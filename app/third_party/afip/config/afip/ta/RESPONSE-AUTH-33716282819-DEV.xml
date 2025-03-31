@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<loginTicketResponse version="1.0">
+    <header>
+        <source>CN=wsaahomo, O=AFIP, C=AR, SERIALNUMBER=CUIT 33693450239</source>
+        <destination>SERIALNUMBER=CUIT 20380669308, CN=lurhom7</destination>
+        <uniqueId>880807146</uniqueId>
+        <generationTime>2025-03-28T16:35:04.465-03:00</generationTime>
+        <expirationTime>2025-03-29T04:35:04.465-03:00</expirationTime>
+    </header>
+    <credentials>
+        <token>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9InllcyI/Pgo8c3NvIHZlcnNpb249IjIuMCI+CiAgICA8aWQgc3JjPSJDTj13c2FhaG9tbywgTz1BRklQLCBDPUFSLCBTRVJJQUxOVU1CRVI9Q1VJVCAzMzY5MzQ1MDIzOSIgZHN0PSJDTj13c2ZlLCBPPUFGSVAsIEM9QVIiIHVuaXF1ZV9pZD0iMzU4OTk2MTciIGdlbl90aW1lPSIxNzQzMTkwNDQ0IiBleHBfdGltZT0iMTc0MzIzMzcwNCIvPgogICAgPG9wZXJhdGlvbiB0eXBlPSJsb2dpbiIgdmFsdWU9ImdyYW50ZWQiPgogICAgICAgIDxsb2dpbiBlbnRpdHk9IjMzNjkzNDUwMjM5IiBzZXJ2aWNlPSJ3c2ZlIiB1aWQ9IlNFUklBTE5VTUJFUj1DVUlUIDIwMzgwNjY5MzA4LCBDTj1sdXJob203IiBhdXRobWV0aG9kPSJjbXMiIHJlZ21ldGhvZD0iMjIiPgogICAgICAgICAgICA8cmVsYXRpb25zPgogICAgICAgICAgICAgICAgPHJlbGF0aW9uIGtleT0iMjAzODA2NjkzMDgiIHJlbHR5cGU9IjQiLz4KICAgICAgICAgICAgICAgIDxyZWxhdGlvbiBrZXk9IjMzNzE2MjgyODE5IiByZWx0eXBlPSI0Ii8+CiAgICAgICAgICAgIDwvcmVsYXRpb25zPgogICAgICAgIDwvbG9naW4+CiAgICA8L29wZXJhdGlvbj4KPC9zc28+Cg==</token>
+        <sign>eJFMoQBSEQcqi+SghzaxKvN3uoOnJCYSFinsfE2iANpXWP7le+dX700pGV1V1SCJpe6/BP9NOVWjNKxrm57mtE9asjUKwKwdP9QPYQB/s5qfpXp3im69MN9JrBnHicayta1vYnzl5LOM4xuknlzymRUhqP14PDcgWO/5W+r4e4o=</sign>
+    </credentials>
+</loginTicketResponse>

@@ -1,3 +1,9 @@
 /vendor/
 /config/
 /.env
+
+/docker/data/ 
+/docker/**.log
+/docker/sonar/
+
+/app/third_party/afip/config/afip/cache/

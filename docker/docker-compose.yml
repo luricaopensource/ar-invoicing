@@ -1,0 +1,75 @@
+version: '3.5'
+services:
+  nginx:
+    image: ${NGINX_IMAGE} 
+    container_name: ${NGINX_CONTAINER_NAME}
+    environment: 
+      TZ: ${TZ}
+    ports:
+      - '${PORT_HTTP_EXTERNAL}:${PORT_HTTP_INTERNAL}'
+      - '${PORT_HTTPS_EXTERNAL}:${PORT_HTTPS_INTERNAL}'
+    networks:
+      - macropagos-network
+    volumes:
+      - ${NGINX_SERVER_CONF}:${NGINX_CONF_INTERNAL}
+      - ${API_SRC}:${WWW_ROOT}
+      - ${LOG_PATH_NGINX}:${NGINX_LOG_INTERNAL}
+      - ${NGINX_SSL_EXTERNAL_CRT}:${NGINX_SSL_INTERNAL_CRT}
+      - ${NGINX_SSL_EXTERNAL_KEY}:${NGINX_SSL_INTERNAL_KEY}
+    depends_on:
+      - php
+    links:
+      - php
+  php:
+    image: ${PHP_IMAGE}
+    container_name: ${PHP_CONTAINER_NAME}
+    environment: 
+      USER_UID: ${UID}
+      USER_GID: ${GID}
+      XDEBUG_CLIENT_HOST: host.docker.internal
+      XDEBUG_CLIENT_PORT: ${PORT_XDEBUG_EXTERNAL} 
+      BASEPATH: ${WWW_ROOT}
+      ENV_SUBSTITUTION_ENABLE: "true"
+      PHP_FPM_LISTEN: ${PORT_PHPFPM_INTERNAL}  
+      CONTEXT: docker
+      TZ: ${TZ}
+    ports:
+      - ${PORT_PHPFPM_EXTERNAL}:${PORT_PHPFPM_INTERNAL}
+    networks:
+      - macropagos-network
+    volumes:
+      - ${API_SRC}:${WWW_ROOT} 
+      - ${LOG_PATH_PHP}:${PHP_LOG_INTERNAL}
+      - ${PHP_CONF_EXTERNAL}:${PHP_CONF_INTERNAL}
+      - ${PHP_FPM_CONF_EXTERNAL}:${PHP_FPM_CONF_INTERNAL}
+  databases:
+    container_name: ${MYSQL_CONTAINER_NAME}
+    image: ${MYSQL_IMAGE}
+    volumes: 
+      - ${MYSQL_DATA_PATH}:${MYSQL_DATA_INTERNAL}
+      - ${LOG_PATH_MYSQL}:${MYSQL_LOG_INTERNAL}
+      - ${MYSQL_SERVER_CONF}:${MYSQL_CONF_INTERNAL}
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE} 
+      MYSQL_USER: ${MYSQL_USER} 
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD} 
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    expose:
+      - "${PORT_MYSQL_INTERNAL}"
+    ports:
+      - '${PORT_MYSQL_EXTERNAL}:${PORT_MYSQL_INTERNAL}'
+    networks:
+      - macropagos-network
+    restart: always
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_ARBITRARY=1
+      - UPLOAD_LIMIT=300M
+    networks:
+      - macropagos-network
+networks:
+  macropagos-network:

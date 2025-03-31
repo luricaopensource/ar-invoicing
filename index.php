@@ -1,34 +1,13 @@
-<?php 
+<?php
 
-require "src/AFIP.php";
+/**
+ * Tero Framework 
+ *
+ * @link      https://github.com/dromero86/tero
+ * @copyright Copyright (c) 2014-2019 Daniel Romero
+ * @license   https://github.com/dromero86/tero/blob/master/LICENSE (MIT License)
+ */    
 
-use AFIP\Afip;
+require "app/vendor/core.php";
 
-$AFIP = new Afip();
-
-try{
-    $AFIP->service('wsfe')->login();
-
-    $token = $AFIP->getTokenAuthorization();
-
-    var_dump($AFIP->service('wsfe')->factory()->FECompUltimoAutorizado(
-        [
-			'PtoVta' 	=> 1,
-			'CbteTipo' 	=> 1
-        ]
-    ));
-
-    var_dump($AFIP->service('wsfe')->factory()->FECompConsultar(
-        [
-		    'FeCompConsReq' => 
-            [
-				'PtoVta' 	=> 1,
-				'CbteTipo' 	=> 1,
-                'CbteNro' 	=> 3
-            ]
-        ]
-    ));
-} 
-catch(Exception $e){
-    var_dump($e->getMessage());
-}
+$App->run(); 

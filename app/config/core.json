@@ -1,0 +1,20 @@
+{
+	"loader":
+	[
+        {"module":"Parser"          ,"library":true, "path":"app\/vendor\/Parser"           ,"name":"parser"    },
+        {"module":"Skeleton"        ,"library":true, "path":"app\/vendor\/Skeleton"         ,"name":"view"      }, 
+        {"module":"Dataset"         ,"library":true, "path":"app\/vendor\/Dataset"          ,"name":"data"      },
+        {"module":"database_result" ,"library":true, "path":"app\/vendor\/database_result"                      }, 
+        {"module":"database"        ,"library":true, "path":"app\/vendor\/database"         ,"name":"db"        },
+        {"module":"Telepatia"       ,"library":true, "path":"app\/vendor\/Telepatia"        ,"name":"session"   },
+        {"module":"Email"           ,"library":true, "path":"app\/vendor\/Email"            ,"name":"email"     },
+        {"module":"input"           ,"library":true, "path":"app\/vendor\/input"                                },
+		{"module":"app\/model\/web" , "helper":true } 
+	],
+    "debug"          : false    ,
+    "error"          : "On"     ,
+    "leak"           : "50M"    ,
+    "timezone"       : "America/Argentina/Buenos_Aires",
+    "encoding"       : "UTF-8"  ,
+    "error_handling" : false
+}

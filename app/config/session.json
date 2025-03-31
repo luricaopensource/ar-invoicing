@@ -1,0 +1,8 @@
+{
+	"Telepatia":
+	{
+		"app": "invoicing",
+		"table":"session",
+		"timeout":60
+	}
+}

@@ -91,10 +91,25 @@ class AfipVoucherService extends AfipRequestService {
             throw new AfipResultException($result->descripcion, $this->logger);
         }
 
-        if( isset($rawResult->{$keyResultHandle}->Errors->Err) ){
+        if( isset($rawResult->{$keyResultHandle}->Errors->Err) )
+        {
             $result = $rawResult->{$keyResultHandle}->Errors->Err;
 
-            throw new AfipResultException($result->Msg, $this->logger);
+            if( is_array($result))
+            {
+                $message = [];
+                
+                foreach($result as $rs)
+                {
+                    $message []= "({$rs->Code}) {$rs->Msg}";
+                }
+                
+                throw new AfipResultException(implode(",\n", $message), $this->logger);
+            }
+            else 
+            {
+                throw new AfipResultException($result->Msg, $this->logger);
+            }
         }
 
         if( isset($rawResult->{$keyResultHandle}->arrayErroresFormato->codigoDescripcion) ){
