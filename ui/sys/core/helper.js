@@ -52,7 +52,7 @@
                 item.push(key+"="+value);
             }
 
-            item.push("rid="+dt);
+            //item.push("rid="+dt);
 
             return __loader.base_url()+"?"+item.join("&");
         },

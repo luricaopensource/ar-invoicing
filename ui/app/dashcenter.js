@@ -10,43 +10,124 @@ app.define("app.dashcenter", function()
         [  
             { height: 24, css:"spacer"},
             {
-                css:"spacer" ,
-                cols:
-                [
-                    { width: 20, css:"spacer" },
-                    {
-                        rows:
-                        [
-                            { template:"<div class='notify'>Like what you see? this is a preliminar version of work.</div>", css:"shadow", height:85 },
-                            { height: 20, css:"spacer" },
-                            {
-                                height: 160,
-                                cols:
-                                [
-                                    { id:"_vehiculos", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"ticket", value:123, label:"Eventos" },
-                                    { width: 30, css:"spacer" },
-                                    { id:"_personal", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"address-book", value:123, label:"Invitados"  },
-                                    { width: 30, css:"spacer" },
-                                    { id:"_mantenimientos", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"shopping-bag", value:123, label:"Productos" }
-                                ]
-                            },
-                            { height: 20, css:"spacer" },
-                            {
-                                height: 160,
-                                cols:
-                                [
-                                    { id:"_arribos", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"truck", value:123, label:"Distribuidoras" },
-                                    { width: 30, css:"spacer" },
-                                    { id:"_barcos", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"flag", value:123, label:"Paises"  },
-                                    { width: 30, css:"spacer" },
-                                    { id:"_servicios", view:"cards", height: 150, css:"card_naranja", color: "orange", icon:"shopping-cart", value:123, label:"Pedidos" }
-                                ]
-                            },
-                            { css:"spacer" }
-                        ]
-                    }, 
-                    { width: 20, css:"spacer" }
-                ] 
+                view:"fieldset", 
+                label:"Emision de Facturas",
+                body:
+                {
+                    rows:
+                    [
+                        { 
+                            cols: 
+                            [
+
+                                { label:"Tipo", view:"text", value:"201 Factura A"},
+                                {},
+                                { label:"Punto de Venta", view:"text", value:"00002"}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [
+
+                                { label:"Factura", view:"text", value:""},
+                                {},
+                                { label:"Concepto", view:"text", value:"2"}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [
+
+                                { label:"Tipo Doc.", view:"text", value:""},
+                                {},
+                                { label:"Receptor", view:"text", value:"2"}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [
+
+                                { label:"Emisor", view:"text", value:""},
+                                {},
+                                { label:"Importe Neto", view:"text", value:"2"}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [
+
+                                { label:"Fecha de Vto", view:"text", value:""},
+                                {},
+                                { label:"IVA", view:"text", value:"2"}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [
+
+                                { label:"Total", view:"text", value:""},
+                                {},
+                                { label:"Moneda", view:"text", value:""}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [
+
+                                { label:"T/C", view:"text", value:""},
+                                {},
+                                { label:"CBU", view:"text", value:""}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [
+
+                                { label:"Alias CBU", view:"text", value:""},
+                                {},
+                                { label:"CAE", view:"text", value:""}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [
+
+                                { label:"Orden de Compra", view:"text", value:""},
+                                {},
+                                { label:"Cbte. Asociado", view:"text", value:""}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [ 
+                                {},
+                                { label:"Pto Vta. Cbte. Asociado", view:"text", value:""}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [ 
+                                {},
+                                { label:"Fecha Cbte. Asoc", view:"text", value:""}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [ 
+                                {},
+                                { label:"Cond IVA Receptor", view:"text", value:""}
+                            ]
+                        },
+                        { 
+                            cols: 
+                            [ 
+                                {},
+                                { label:"Es de Anulacion?", view:"text", value:""}
+                            ]
+                        },
+                        {}
+                    ]
+                }
             },
             {css:"spacer"}
         ]

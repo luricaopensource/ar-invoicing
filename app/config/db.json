@@ -4,11 +4,11 @@
 		"driver"    : "mysql"	,
 		"user"		: "root"	,
 		"pass"		: "root"	,
-		"host"		: "localhost" ,
+		"host"		: "lurica-mysql" ,
 		"db"  		: "invoicing" ,
 		"charset"  	: "utf8" ,
 		"collate"  	: "utf8_general_ci",
 		"default"   : true ,
-		"debug"     : false
+		"debug"     : true
 	}
 }

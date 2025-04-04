@@ -150,7 +150,7 @@ class Telepatia
 		}
 		else
 		{
-			_LOG(core::getInstance(), __CLASS__, "No se hallo la sección [Telepatia]");
+			_LOG(core::getInstance(), __CLASS__, "No se hallo la secciï¿½n [Telepatia]");
 		}
 
 	}
@@ -332,9 +332,8 @@ class Telepatia
 
 		setcookie( $this->appname , $cookie , time() + ( 3600 * $this->session_time ) , '/');
 
-        $sIp    = $this->ip_address();
-
-        $this->db->query(" INSERT {$this->table} SET ip = '{$sIp}', id_user = '{$id}', type = '{$this->appname}', cookie = '{$cookie}', expire ='{$this->session_time}' ");
+        $sIp    = $this->ip_address(); 
+        $this->db->query(" INSERT {$this->table} SET ip = '{$sIp}', id_user = '{$id}', type = '{$this->appname}', cookie = '{$cookie}', expire ='{$this->session_time}', login_at = now() ");
     }
 
 

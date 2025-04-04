@@ -1,9 +1,6 @@
 
 /* BEGIN sdk/ui/css/crunch/global.css */
 
-
-
-
 .webix_full_screen
 {
     background: #f6f6f6 ;
@@ -11,7 +8,7 @@
 
 .webix_view
 {
-    font-family: 'Roboto', sans-serif ;
+    /* font-family: 'Roboto', sans-serif ; */
     -webkit-font-smoothing:antialiased;
 }
 
@@ -23,14 +20,19 @@
 .webix_inp_label            ,
 .webix_inp_top_label
 {
-    font-family: 'Roboto', sans-serif ;
+    /* font-family: 'Roboto', sans-serif ; */
     -webkit-font-smoothing:antialiased;
 }
 
 .webix_button input, .webix_popup_button div
 {
-    font-family: 'Roboto', sans-serif ;
+    /* font-family: 'Roboto', sans-serif ; */
     -webkit-font-smoothing:antialiased;
+}
+
+.webix_secondary .webix_button {
+    background: transparent; 
+    color: transparent;
 }
 
 
@@ -108,14 +110,19 @@
 
 [view_id='app.mainbar'] .main_logo
 {
-    margin-top  : 0 !important;
-    margin-left : 0 !important;
-    height      : 100% !important;
+    /*margin-top  : 0 !important;*/
+    /*margin-left : 0 !important;*/
+    /*height      : 100% !important;*/
     background  : #fff ;
-    line-height : 56px;
-    font-size   : 26px;
+    /*line-height : 56px;*/
+    /*font-size   : 26px;*/
     font-weight : 700; 
     user-select: none;
+}
+
+[view_id='app.mainbar'] .main_logo .webix_template
+{
+    padding: 0;
 }
 
 [view_id='app.mainbar'] .main_logo div center
@@ -123,18 +130,37 @@
     -webkit-font-smoothing:antialiased;
 }
 
+[view_id='app.mainbar'] .main_logo .webix_template .logospace
+{
+    line-height: 70px;
+    height: 100%;
+    font-size: 20px;
+}
+
 [view_id='app.mainbar'] .acople
 {
-    margin-top   : 0 !important;
-    margin-left  : 0 !important;
-    padding-left : 5.3px;
-    height       : 100% !important;
+    /*margin-top   : 0 !important;*/
+    /*margin-left  : 0 !important;*/
+    /*padding-left : 5.3px;*/
+    /*height       : 100% !important;*/
     background   : #2196F3 !important; 
 }
 
 [view_id='app.mainbar'] .webix_control
 {
     border-color:transparent;
+}
+
+[view_id='app.mainbar'] .webix_control .webix_el_box
+{
+    padding:0;
+}
+
+[view_id='app.mainbar'] .webix_control .webix_el_box .webix_button .webix_icon_btn
+{
+    color:white;
+    font-size: 20px;
+    line-height: normal !important;
 }
 
 [view_id='app.mainbar'] .webix_img_btn:active, 
@@ -1885,7 +1911,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40efefef', e
 
 .login-modal
 {
-    background-image: url(https://source.unsplash.com/1600x900/?nature,water) ;
+    background-image: url(https://picsum.photos/1920/1080?nature) ;
     background-repeat: no-repeat;
     background-size: cover;   
     background-color: #0e1f1e;

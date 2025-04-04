@@ -56,7 +56,7 @@ app.define("app.dashboard",function()
             margin    : 0,
             padding   : 0,
             type      : { height:48  },
-            template  : "<span class='webix_icon fa-#icon#'></span> #name#", 
+            template  : "<span class='webix_icon fa fa-#icon#'></span> #name#", 
             select    : true,
             autoheight: true,
             data      :

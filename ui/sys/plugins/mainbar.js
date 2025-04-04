@@ -9,6 +9,8 @@ webix.protoUI
         config.css     = "main-toolbar";
         config.height  = 70            ;
         config.borderless = true;
+        config.margin = 0;
+        config.padding = 0;
         config.elements=[  
             {
                 id:"_mb_logo",
@@ -16,16 +18,20 @@ webix.protoUI
                 template:"<center class='logospace'>#name#</center>",
                 data:{ name:usr.name.toUpperCase() },
                 borderless:true,
+                margin:0,
+                padding:0,
                 width: 250
             }, 
             {
                 id   : "_main_btn_action" , 
                 view : "button"    ,
                 type : "icon"      ,
-                icon : "bars"      ,
+                icon : "fa fa-bars"      ,
                 align: "center"      ,
                 css  : "acople",
                 width: 56,
+                margin:0,
+                padding:0,
                 click: function()
                 {
                     if(__.current["mb"].open == true)
@@ -67,7 +73,7 @@ webix.protoUI
                 id    : "_main_tool_option",
                 view  : "button"           ,
                 type  : "icon"             ,
-                icon  : "ellipsis-v"       ,
+                icon  : "fa fa-ellipsis-v"       ,
                 align : "right"            ,
                 css   : "acople"           , 
                 width : 56                 ,

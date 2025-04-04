@@ -1,11 +1,11 @@
 {
-	"name"    : "HALCON",
+	"name"    : "LURICA",
 	"jsonp"   : false,
 	"domain"  : "",
     "preview" : "", 
     "session" :
     {
-        "enable" : false,
+        "enable" : true,
         "login"  : "auth-login"  ,
         "check"  : "auth-online" ,
         "logout" : "auth-logout" ,
