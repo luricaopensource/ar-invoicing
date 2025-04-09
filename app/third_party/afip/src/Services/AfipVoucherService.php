@@ -275,6 +275,22 @@ class AfipVoucherService extends AfipRequestService {
 
         $this->handleErrors($rawResult, "FEParamGetTiposTributosResult"); 
     }
+
+    public function FEParamGetPtosVenta(array $params =[], $timeout = FALSE, $raw = FALSE)
+    { 
+        $this->logger->info(self::TAG, __FUNCTION__);
+
+        $this->afterRequest($params); 
+
+        $rawResult = $this->request(__FUNCTION__, $params, $timeout); 
+
+        if($raw) return $rawResult;
+
+        if(isset($rawResult->FEParamGetPtosVentaResult->ResultGet->PtoVenta))
+            return $rawResult->FEParamGetPtosVentaResult->ResultGet->PtoVenta;
+
+        $this->handleErrors($rawResult, "FEParamGetPtosVentaResult"); 
+    }
  
     public function FEDummy(array $params=[], $timeout = FALSE, $raw = FALSE)
     {

@@ -24,9 +24,10 @@ app.define("app.dashcenter", function()
                                     id      : "factura.tipo",
                                     name    : "tipo",
                                     label   : "Tipo", 
-                                    view    : "richselect",
+                                    view    : "combo",
+                                    yCount  : "3", 
                                     options : __.req({action:"tipo_factura.combo"}),
-                                    width   : 250
+                                    width   : 330
                                 },
                                 {},
                                 { 
@@ -34,7 +35,7 @@ app.define("app.dashcenter", function()
                                     label       : "Punto de Venta",
                                     labelWidth  : 130, 
                                     view        : "richselect",
-                                    options : __.req({action:"pto_vta.combo"})
+                                    options     : ["00001","00002","00003"]
                                 }
                             ]
                         },
@@ -61,9 +62,9 @@ app.define("app.dashcenter", function()
                                 {
                                     name    : "tipo_doc", 
                                     label   : "Tipo Doc.", 
-                                    view    : "richselect",
+                                    view    : "combo",
                                     options : __.req({action:"tipo_doc.combo"}),
-                                    width   : 250
+                                    width   : 330
                                 },
                                 {},
                                 { 
@@ -86,7 +87,7 @@ app.define("app.dashcenter", function()
                                     name    : "tipo_agente",  
                                     view    : "richselect", 
                                     width   : 75,
-                                    options : __.req({action:"tipo_agente.combo"})
+                                    options : ["ADC","SCA"]
                                 },
                                 {},
                                 { 

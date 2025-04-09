@@ -184,7 +184,7 @@ class AfipAuthService {
 
         $i = 0;  $CMS = "";
 
-        $this->checkCertificate();
+        $this->checkCertificate(); 
 
         $status = openssl_pkcs7_sign( $this->fileXMLRequest, $this->fileTMP, "file://" .$this->fileCRT, array("file://" .$this->fileKEY, $this->phrase), array(), !PKCS7_DETACHED );
 

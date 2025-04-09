@@ -1055,6 +1055,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40efefef', e
 }
 
 /* combo popup*/
+/*
 [view_id^="$suggest"]
 {
     border:none !important; 
@@ -1092,7 +1093,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40efefef', e
 {
     background: rgba(0, 0, 0, 0.11);
 }
-
+*/
 
 
 /* END sdk/ui/css/crunch/form_combo.css */
