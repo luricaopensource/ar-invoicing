@@ -1,13 +1,14 @@
 -- phpMyAdmin SQL Dump
--- version 4.6.6deb4
+-- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
--- Servidor: localhost
--- Tiempo de generación: 06-08-2018 a las 08:31:00
--- Versión del servidor: 10.1.26-MariaDB-0+deb9u1
--- Versión de PHP: 7.0.30-0+deb9u1
+-- Servidor: lurica-mysql
+-- Tiempo de generación: 10-04-2025 a las 21:07:42
+-- Versión del servidor: 10.6.11-MariaDB
+-- Versión de PHP: 8.2.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
 SET time_zone = "+00:00";
 
 
@@ -20,42 +21,102 @@ SET time_zone = "+00:00";
 -- Base de datos: `invoicing`
 --
 
--- Basic login
-CREATE TABLE `session` (
-  `ip`        varchar(16 ) NOT NULL DEFAULT '0' COMMENT 'IP',
-  `last_time` timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Ultima Fecha',
-  `store`     varchar(255) NOT NULL DEFAULT '0' COMMENT 'Almacen',
-  `id_user`   bigint (20 ) NOT NULL COMMENT 'Id Usuario',
-  `type`      varchar(255) NOT NULL COMMENT 'Tipo',
-  `cookie`    varchar(255) NOT NULL COMMENT 'Cookie',
-  `expire`    int    (11 ) NOT NULL COMMENT 'Expiracion',
-  `login_at`  datetime     NOT NULL COMMENT 'Fecha Login'
-) ENGINE=MEMORY DEFAULT CHARSET=utf8;
+-- --------------------------------------------------------
 
+--
+-- Estructura de tabla para la tabla `session`
+--
+
+CREATE TABLE `session` (
+  `ip` varchar(16) NOT NULL DEFAULT '0' COMMENT 'IP',
+  `last_time` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Ultima Fecha',
+  `store` varchar(255) NOT NULL DEFAULT '0' COMMENT 'Almacen',
+  `id_user` bigint(20) NOT NULL COMMENT 'Id Usuario',
+  `type` varchar(255) NOT NULL COMMENT 'Tipo',
+  `cookie` varchar(255) NOT NULL COMMENT 'Cookie',
+  `expire` int(11) NOT NULL COMMENT 'Expiracion',
+  `login_at` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'Fecha Login'
+) ENGINE=MEMORY DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuarios`
+--
 
 CREATE TABLE `usuarios` (
-  `id`               int    (11 ) NOT NULL AUTO_INCREMENT,
-  `nombre`           varchar(255) NOT NULL,
-  `apellido`         varchar(255) NOT NULL,
-  `tipo`             int    (11 ) NOT NULL,
-  `user`             varchar(255) NOT NULL,
-  `pass`             varchar(255) NOT NULL,
-  `mail`             varchar(255) NOT NULL,
-  `tel`              varchar(255) NOT NULL, 
-  `id_empresa`       int    (11 ) NOT NULL,
-  `id_user_delegado` int    (11 ) NOT NULL,
-  `id_distribuidora` int    (11 ) NOT NULL,
-  `puede_crear`      tinyint(1  ) NOT NULL,
-  `activo`           tinyint(1  ) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  `id` int(11) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
+  `apellido` varchar(255) NOT NULL,
+  `tipo` int(11) NOT NULL,
+  `user` varchar(255) NOT NULL,
+  `pass` varchar(255) NOT NULL,
+  `mail` varchar(255) NOT NULL,
+  `tel` varchar(255) NOT NULL,
+  `activo` tinyint(1) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `usuarios`
+--
+
+INSERT INTO `usuarios` (`id`, `nombre`, `apellido`, `tipo`, `user`, `pass`, `mail`, `tel`, `activo`) VALUES
+(1, 'Demo', 'Demo', 1, 'demo', 'fe01ce2a7fbac8fafaed7c982a04e229', '', '', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuarios_tipo`
+--
 
 CREATE TABLE `usuarios_tipo` (
-  `id`         int    (11 ) NOT NULL AUTO_INCREMENT,
-  `nombre`     varchar(255) NOT NULL,
-  `color`      varchar(255) NOT NULL,
-  `dashboard`  varchar(255) NOT NULL,
-  `dashcenter` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  `id` int(11) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
+  `color` varchar(255) NOT NULL,
+  `dashboard` varchar(255) NOT NULL,
+  `dashcenter` varchar(255) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `usuarios_tipo`
+--
+
+INSERT INTO `usuarios_tipo` (`id`, `nombre`, `color`, `dashboard`, `dashcenter`) VALUES
+(1, 'admin', '#000000', 'app.dashboard', 'app.dashcenter');
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `usuarios`
+--
+ALTER TABLE `usuarios`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `usuarios_tipo`
+--
+ALTER TABLE `usuarios_tipo`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `usuarios`
+--
+ALTER TABLE `usuarios`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `usuarios_tipo`
+--
+ALTER TABLE `usuarios_tipo`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
