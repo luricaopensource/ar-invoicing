@@ -39,6 +39,7 @@ app.define("app.dashboard",function()
         ]
     }); 
 
+    /*
     webix.ui
     ({
         view      : "popup",
@@ -77,6 +78,7 @@ app.define("app.dashboard",function()
             }            
         }
     });
+    */
 
     waves.clear();
 

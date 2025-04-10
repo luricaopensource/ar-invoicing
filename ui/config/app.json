@@ -20,7 +20,7 @@
             "open" : true,
             "data" :
             [  
-                { "id": "app.abm.clientes_view" , "value":"Clientes" }
+                { "id": "app.dashcenter" , "value":"EMISION DE FACTURAS" }
             ] 
         }
     ]

@@ -9,12 +9,13 @@ app.define("app.dashcenter", function()
         rows        :
         [
             {
+                id      : "view.facturador",
                 view    : "fieldset", 
                 label   : "Emision de Facturas",
                 body    :
                 {
-                    id  : "facturador",
-                    view: "form", 
+                    id      : "facturador",
+                    view    : "form", 
                     elements:
                     [
                         { 
@@ -253,10 +254,39 @@ app.define("app.dashcenter", function()
             {css:"spacer"}
         ]
     }, $$("content")); 
+
+    webix.extend($$("view.facturador"), webix.ProgressBar);
+    $$("view.facturador").showProgress({ hide: false });
+
+    webix.ui
+    ({
+        id    : "_main_tool_option" ,
+        view  : "button"            ,
+        type  : "icon"              ,
+        label : "<b>FACTURAR</b>"   ,
+        icon  : "fa fa-credit-card" ,
+        align : "right"             ,
+        css   : "acople"            , 
+        width : 200                 ,
+        click : function()
+        {
+            $$("view.facturador").showProgress({ hide: false }); 
+            __.POST({action:"home.facturacion" }, $$("facturador").getValues(), function(response){
+
+                webix.alert({
+                    type    : "alert-error",
+                    title   : "FACTURADOR",
+                    text    : "<textarea style='width: 200px; height: 100px;'>"+response.message+"</textarea>"
+                  });
+                $$("view.facturador").showProgress({ hide: true });
+            });
+        }
+    }, $$("_main_tool_option")); 
  
     __.GET({action:"home.stats"}, function(response){
          
-        $$("facturador").setValues(response)
+        $$("facturador").setValues(response);
+        $$("view.facturador").showProgress({ hide: true });
 
     });
     

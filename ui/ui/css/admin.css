@@ -233,6 +233,7 @@
 [view_id='app.mainbar']  .webix_img_btn_top
 {
     text-align: center;
+    color: white;
 }
 
 [view_id='app.mainbar']  .webix_img_btn:hover, 
@@ -254,6 +255,17 @@
 {
     background-color: transparent !important;
     box-shadow:none !important;
+}
+
+
+[view_id='app.mainbar'] .webix_control .webix_el_box .webix_button b
+{
+    padding-left: 10px;
+}
+
+[view_id="view.facturador"] .webix_progress_icon
+{
+    background: #fafafaad;
 }
 /* END sdk/ui/css/crunch/toolbar_button.css */
 

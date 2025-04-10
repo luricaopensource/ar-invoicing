@@ -34,6 +34,7 @@ webix.protoUI
                 padding:0,
                 click: function()
                 {
+                    /*
                     if(__.current["mb"].open == true)
                     {
                         webix.ui({
@@ -61,6 +62,7 @@ webix.protoUI
                         __.current["mb"].open =true;
                     }
                     $$("_sidebar").toggle();
+                    */
                 }           
             },
             { 

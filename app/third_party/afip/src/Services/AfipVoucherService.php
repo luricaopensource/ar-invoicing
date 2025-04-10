@@ -145,7 +145,9 @@ class AfipVoucherService extends AfipRequestService {
 
         $this->afterRequest($params); 
 
-        return $this->request(__FUNCTION__, $params, $timeout);
+        $rawResult =  $this->request(__FUNCTION__, $params, $timeout);
+
+        $this->handleErrors($rawResult, "FECAESolicitarResult"); 
     }
 
     public function FECompConsultar(array $params =[], $timeout = FALSE, $raw = FALSE)
