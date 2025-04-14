@@ -273,11 +273,22 @@ app.define("app.dashcenter", function()
             $$("view.facturador").showProgress({ hide: false }); 
             __.POST({action:"home.facturacion" }, $$("facturador").getValues(), function(response){
 
-                webix.alert({
-                    type    : "alert-error",
-                    title   : "FACTURADOR",
-                    text    : "<textarea style='width: 200px; height: 100px;'>"+response.message+"</textarea>"
-                  });
+                if("Errors" in response){
+                    webix.alert({
+                        type    : "alert-error",
+                        title   : "FACTURADOR",
+                        text    : "<textarea style='width: 200px; height: 100px;'>"+JSON.stringify(response.Errors.Err)+"</textarea>"
+                      });
+                }
+
+                if("Observaciones" in response.FeDetResp.FECAEDetResponse){
+                    webix.alert({
+                        type    : "alert-warning",
+                        title   : "FACTURADOR",
+                        text    : "<textarea style='width: 200px; height: 100px;'>"+JSON.stringify(response.FeDetResp.FECAEDetResponse.Observaciones)+"</textarea>"
+                      });
+                }                
+                
                 $$("view.facturador").showProgress({ hide: true });
             });
         }

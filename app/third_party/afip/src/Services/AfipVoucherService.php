@@ -134,7 +134,7 @@ class AfipVoucherService extends AfipRequestService {
         if($raw) return $rawResult;
 
         if(isset($rawResult->FECompUltimoAutorizadoResult))
-            return $rawResult->FECompUltimoAutorizadoResult;
+            return $rawResult->FECompUltimoAutorizadoResult; 
 
         $this->handleErrors($rawResult, "FECompUltimoAutorizadoResult"); 
     }
@@ -147,6 +147,11 @@ class AfipVoucherService extends AfipRequestService {
 
         $rawResult =  $this->request(__FUNCTION__, $params, $timeout);
 
+        if($raw) return $rawResult; 
+
+        if(isset($rawResult->FECAESolicitarResult))
+            return $rawResult->FECAESolicitarResult;
+ 
         $this->handleErrors($rawResult, "FECAESolicitarResult"); 
     }
 
