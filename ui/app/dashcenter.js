@@ -173,6 +173,7 @@ app.define("app.dashcenter", function()
                                 },
                                 {},
                                 { 
+                                    id      : "facturbo.cae",
                                     name    : "cae", 
                                     label   : "CAE", 
                                     view    : "text"
@@ -217,8 +218,23 @@ app.define("app.dashcenter", function()
                                 { 
                                     name        : "fecha_cbte_asoc", 
                                     label       : "Fecha Cbte. Asoc", 
-                                    view        : "text", 
+                                    view        : "datepicker", 
                                     labelWidth  : 150
+                                }
+                            ]
+                        },
+                        {
+                            cols: 
+                            [ 
+                                {},
+                                {
+                                    id      : "factura.tipo_asoc",
+                                    name    : "tipo_asoc",
+                                    label   : "Tipo Cbte. Asoc", 
+                                    view    : "combo",
+                                    yCount  : "3", 
+                                    options : ["91", "88", "988", "990", "991", "993", "994", "995", "996", "997"],
+                                    width   : 330
                                 }
                             ]
                         },
@@ -273,6 +289,12 @@ app.define("app.dashcenter", function()
             $$("view.facturador").showProgress({ hide: false }); 
             __.POST({action:"home.facturacion" }, $$("facturador").getValues(), function(response){
 
+                if(response.FeDetResp.FECAEDetResponse.Resultado == "A"){
+                    $$("facturbo.cae").setValue(response.FeDetResp.FECAEDetResponse.CAE);
+
+                    webix.message("Facturacion exitosa! CAE: " + response.FeDetResp.FECAEDetResponse.CAE);
+                }
+
                 if("Errors" in response){
                     webix.alert({
                         type    : "alert-error",
@@ -287,8 +309,10 @@ app.define("app.dashcenter", function()
                         title   : "FACTURADOR",
                         text    : "<textarea style='width: 200px; height: 100px;'>"+JSON.stringify(response.FeDetResp.FECAEDetResponse.Observaciones)+"</textarea>"
                       });
-                }                
-                
+                }
+
+
+
                 $$("view.facturador").showProgress({ hide: true });
             });
         }

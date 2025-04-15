@@ -172,6 +172,8 @@ $App->get('home.facturacion', function(){
     $opcionales = [];
     $iva = [];
     $tributo = [];
+    $fecha_venc_pago = intval(date('Ymd', strtotime($post->fecha_vto)));
+    $cmp_asoc = [];
 
     if($post->tipo == 201){
         $opcionales = [
@@ -188,6 +190,16 @@ $App->get('home.facturacion', function(){
                 'Valor' 	=> $post->tipo_agente
             ]                        
         ];
+
+        $cmp_asoc = [
+            [
+                'Tipo' 		=> $post->tipo_asoc, 
+                'PtoVta' 	=> $post->pto_vta_cbte_asoc, 
+                'Nro' 	    => $post->cbte_asoc, 
+                'Cuit' 	    => $post->emisor, 
+                'CbteFch' 	=> intval(date('Ymd', strtotime($post->fecha_cbte_asoc)))
+            ]
+        ];
     }
     else{
         $opcionales = [ 
@@ -196,6 +208,10 @@ $App->get('home.facturacion', function(){
                 'Valor' 	=> 'N'
             ]                        
         ];        
+
+        $fecha_venc_pago = "";
+
+
     }
 
     
@@ -243,16 +259,16 @@ $App->get('home.facturacion', function(){
                     'ImpTrib' 		=> "1.00", //Importe total de tributos
                     'FchServDesde' 	=> "20190101", // (Opcional) Fecha de inicio del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
                     'FchServHasta' 	=> "20190131", // (Opcional) Fecha de fin del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
-                    'FchVtoPago' 	=> intval(date('Ymd', strtotime($post->fecha_vto))), // (Opcional) Fecha de vencimiento del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
+                    'FchVtoPago' 	=> $fecha_venc_pago, // (Opcional) Fecha de vencimiento del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
                     'MonId' 		=> $post->moneda, //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos) 
                     'MonCotiz' 		=> 1, // Cotización de la moneda usada (1 para pesos argentinos)  
-                    'CanMisMonExt'  => 0,
+                    //'CanMisMonExt'  => 0,
                     'CondicionIVAReceptorId'=> 1, 
-                    'CbtesAsoc' 	=> [],
+                    'CbtesAsoc' 	=> $cmp_asoc,
                     'Tributos' 		=> $tributo, 
                     'Iva' 			=> $iva, 
                     'Opcionales' 	=> $opcionales, 
-                    'Compradores' 	=> []
+                    //'Compradores' 	=> []
                 ]
             ]
         ]
