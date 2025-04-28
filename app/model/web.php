@@ -5,11 +5,31 @@ $App = core::getInstance();
 require BASEPATH."app/third_party/afip/src/AFIP.php";
 
 use AFIP\Afip;
+use AFIP\Exceptions\AfipLoginException;
  
 $App->get('index', function ()
 {
     $this->data->set("rand",rand(111,999) );
     $this->parser->parse(BASEPATH."ui/index.html", $this->data->get());
+});
+
+$App->get('afip.login', function ()
+{
+    $AFIP = new Afip();
+
+    try{
+        $AFIP->service('wsfe')->login();
+    }catch (AfipLoginException $e){
+        $data = new stdClass;
+        $data->status = FALSE;
+        $data->message = $e->getMessage();
+        die(json_encode($data));
+    }
+    
+    $data = new stdClass;
+    $data->status   = TRUE;
+    $data->message  = "Success";
+    die(json_encode($data));
 });
 
 $App->get('home.stats', function(){
@@ -45,12 +65,8 @@ $App->get('home.stats', function(){
 
 $App->get('tipo_factura.combo', function(){
 
-    $AFIP = new Afip();
-
-    $AFIP->service('wsfe')->login();
-
+    $AFIP = new Afip(); 
     $tipo = $AFIP->service('wsfe')->factory()->FEParamGetTiposCbte(); 
-
     $data = [];
 
     foreach($tipo as $row){
@@ -66,10 +82,7 @@ $App->get('tipo_factura.combo', function(){
 
 $App->get('tipo_doc.combo', function(){
 
-    $AFIP = new Afip();
-
-    $AFIP->service('wsfe')->login();
-
+    $AFIP = new Afip(); 
     $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposDoc();
 
     $data = [];
@@ -88,10 +101,7 @@ $App->get('tipo_doc.combo', function(){
 
 $App->get('pto_vta.combo', function(){
 
-    $AFIP = new Afip();
-
-    $AFIP->service('wsfe')->login();
-
+    $AFIP = new Afip(); 
     $tipo = $AFIP->service('wsfe')->factory()->FEParamGetPtosVenta(); 
 
     $data = [];
@@ -109,10 +119,7 @@ $App->get('pto_vta.combo', function(){
 
 $App->get('iva.combo', function(){
 
-    $AFIP = new Afip();
-
-    $AFIP->service('wsfe')->login();
-
+    $AFIP = new Afip(); 
     $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposIva();
 
     $data = [];
@@ -130,10 +137,7 @@ $App->get('iva.combo', function(){
 
 $App->get('moneda.combo', function(){
 
-    $AFIP = new Afip();
-
-    $AFIP->service('wsfe')->login();
-
+    $AFIP = new Afip(); 
     $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposMonedas();
 
     $data = [];
@@ -157,11 +161,7 @@ $App->get('home.facturacion', function(){
     $post->punto_venta = 4002; 
     $post->tipo = 201;
 
-    
-    $AFIP = new Afip();
-
-    $AFIP->service('wsfe')->login();
-
+    $AFIP = new Afip(); 
     $last_voucher = $AFIP->service('wsfe')->factory()->FECompUltimoAutorizado(['PtoVta'=> $post->punto_venta, 'CbteTipo'=> $post->tipo]);
 
     $voucher_number = $last_voucher->CbteNro + 1;

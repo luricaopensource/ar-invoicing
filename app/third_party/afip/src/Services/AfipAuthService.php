@@ -165,8 +165,14 @@ class AfipAuthService {
 
         $certData = openssl_x509_parse(file_get_contents($this->fileCRT));
 
+        $actual_time 		= new DateTime(date('c', time() ));
+        $expiration_time 	= new DateTime(date('c', $certData['validTo_time_t'] ));
+ 
+        if($actual_time > $expiration_time)
+        throw new AfipLoginException("Certificate Expired [".$certData['name']."]: ".$expiration_time->format('d/m/Y H:i:s')." in current time: ".$actual_time->format('d/m/Y H:i:s'), $this->logger);
+
         if(!$certData)
-            throw new AfipLoginException("Invalid Cretificate CRT {$this->fileCRT}", $this->logger);  
+            throw new AfipLoginException("Invalid Certificate CRT {$this->fileCRT}", $this->logger);  
 
         $this->logger->info(self::TAG, "Certificate: ".$certData['name']);
     }

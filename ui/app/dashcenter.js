@@ -272,7 +272,6 @@ app.define("app.dashcenter", function()
     }, $$("content")); 
 
     webix.extend($$("view.facturador"), webix.ProgressBar);
-    $$("view.facturador").showProgress({ hide: false });
 
     webix.ui
     ({
@@ -319,10 +318,45 @@ app.define("app.dashcenter", function()
     }, $$("_main_tool_option")); 
  
     __.GET({action:"home.stats"}, function(response){
-         
-        $$("facturador").setValues(response);
-        $$("view.facturador").showProgress({ hide: true });
-
+        $$("facturador").setValues(response); 
     });
+
+    webix.ui
+    ({
+        id      : "_sec_tool_option",
+        css     : "acople"          , 
+        width   : 110               ,
+        view    : "switch"          ,
+        value   : 1                 ,
+        onLabel : "INICIAR"         ,
+        offLabel: "DETENER"         ,
+        click   : function(id){
+            __.GET({action:"afip.login"}, function(response){
+
+                if( response.status ){
+                    $$("view.facturador").showProgress({ hide: true }); 
+                    $$("_main_tool_option").enable();
+                    $$("_sec_tool_option").disable();
+                    $$("_sec_tool_option").setValue(0);
+                } 
+                else{ 
+                    $$("view.facturador").showProgress({ hide: false }); 
+                    $$("_main_tool_option").disable();
+                    $$("_sec_tool_option").setValue(1);
+
+                    webix.alert({
+                        type    : "alert-error",
+                        title   : "EMISOR",
+                        text    : response.message
+                    });
+                } 
+            });
+        }
+
+    }, $$("_sec_tool_option"));  
+
+    $$("view.facturador").showProgress({ hide: false }); 
+    $$("_main_tool_option").disable();
+
     
 });

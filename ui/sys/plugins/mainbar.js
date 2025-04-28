@@ -72,6 +72,11 @@ webix.protoUI
             },
             { css:"acople"}, 
             {
+                id    : "_sec_tool_option", 
+                css   : "acople"           , 
+                width : 56  
+            }, 
+            {
                 id    : "_main_tool_option",
                 view  : "button"           ,
                 type  : "icon"             ,
