@@ -113,7 +113,7 @@
             document.getElementsByTagName("head")[0].appendChild(e);
              
             var e   = document.createElement("meta");  
-            that.setDomAttribute(e, "name"   , "apple-mobile-web-app-capable");  
+            that.setDomAttribute(e, "name"   , "mobile-web-app-capable");  
             that.setDomAttribute(e, "content", "yes"); 
             document.getElementsByTagName("head")[0].appendChild(e);
  

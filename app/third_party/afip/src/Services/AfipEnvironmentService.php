@@ -8,7 +8,7 @@ use stdClass;
 
 class AfipEnvironmentService {
 
-    private string $configFile = "config/env.json";
+    private string $configFile = "app/config/afip.json";
     protected string $WSAA_WSDL = "";
     protected string $WSAA_URL = "";
     protected string $CERT = "";
@@ -102,7 +102,7 @@ class AfipEnvironmentService {
      */
     private function loadConfigFile() : void
     {
-        $file = $this->_relativepath().$this->configFile;
+        $file = $this->_basepath().$this->configFile;
 
         if( !file_exists($file) ) throw new AfipEnvException("El archivo de configuraciones ({$file}) no esta definido.");
 
@@ -135,7 +135,7 @@ class AfipEnvironmentService {
 
     protected function _basepath()
     {
-        return str_replace(self::CURRENT_PATH, "",__DIR__);
+        return defined("BASEPATH") ? BASEPATH : str_replace(self::CURRENT_PATH, "",__DIR__);
     }
 
     protected function _relativepath()

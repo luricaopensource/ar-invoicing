@@ -35,7 +35,7 @@ $App->get('afip.login', function ()
 $App->get('home.stats', function(){
 
     $factura =  new stdClass;
-    $factura->tipo              = 1;
+    $factura->tipo              = 201;
     $factura->punto_venta       = "00001";
     $factura->nro               = "";
     $factura->concepto          = 2;
@@ -43,11 +43,11 @@ $App->get('home.stats', function(){
     $factura->receptor          = "305000100842";
     $factura->emisor            = "33716282819";
     $factura->tipo_agente       = "ADC";
-    $factura->importe_neto      = "1000000";
+    $factura->importe_neto      = "1000";
     $factura->fecha_vto         = "2025-06-15";
-    $factura->iva               = "210000";
+    $factura->iva               = "210";
     $factura->iva_porc          = 5;
-    $factura->total             = "1210000";
+    $factura->total             = "1210";
     $factura->moneda            = "PES";
     $factura->tyc               = 1;
     $factura->cbu               = "2850590940090418135201";
@@ -65,7 +65,9 @@ $App->get('home.stats', function(){
 
 $App->get('tipo_factura.combo', function(){
 
+    /*
     $AFIP = new Afip(); 
+    $AFIP->service('wsfe')->login();
     $tipo = $AFIP->service('wsfe')->factory()->FEParamGetTiposCbte(); 
     $data = [];
 
@@ -78,11 +80,14 @@ $App->get('tipo_factura.combo', function(){
     }
 
     die(json_encode($data));
+    */
+    die('[{"id":201, "value":"201 - FACTURA DE CRÉDITO"}, {"id":202, "value":"202 -NOTA DE DÉBITO"}, {"id":203, "value":"203 - NOTA DE CRÉDITO"}]');
 });
 
 $App->get('tipo_doc.combo', function(){
 
     $AFIP = new Afip(); 
+    $AFIP->service('wsfe')->login();
     $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposDoc();
 
     $data = [];
@@ -102,6 +107,7 @@ $App->get('tipo_doc.combo', function(){
 $App->get('pto_vta.combo', function(){
 
     $AFIP = new Afip(); 
+    $AFIP->service('wsfe')->login();
     $tipo = $AFIP->service('wsfe')->factory()->FEParamGetPtosVenta(); 
 
     $data = [];
@@ -119,7 +125,9 @@ $App->get('pto_vta.combo', function(){
 
 $App->get('iva.combo', function(){
 
+    /*
     $AFIP = new Afip(); 
+    $AFIP->service('wsfe')->login();
     $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposIva();
 
     $data = [];
@@ -128,16 +136,20 @@ $App->get('iva.combo', function(){
         
         $item = new stdClass;
         $item->id = (int) $doc->Id;
-        $item->value = $doc->Desc;
+        $item->value = "{$doc->Id} - {$doc->Desc}";
         $data[]=$item;
     }
 
     die(json_encode($data));
+    */
+    die('[{"id":3, "value":"0"}, {"id":5, "value":"21"}, {"id":4, "value":"10.5"}]');
 });
 
 $App->get('moneda.combo', function(){
 
+    /*
     $AFIP = new Afip(); 
+    $AFIP->service('wsfe')->login();
     $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposMonedas();
 
     $data = [];
@@ -146,22 +158,46 @@ $App->get('moneda.combo', function(){
         
         $item = new stdClass;
         $item->id = $doc->Id;
-        $item->value = $doc->Desc;
+        $item->value = "{$doc->Id} - {$doc->Desc}";
+        $data[]=$item;
+    }
+
+    die(json_encode($data));
+    */
+     die('[{"id":"PES", "value":"PESOS ARGENTINOS"}, {"id":"DOL", "value":"DOLAR ESTADOUNIDENSE"}]');
+});
+
+
+$App->get('tipo_concepto.combo', function(){
+
+    $AFIP = new Afip(); 
+    $AFIP->service('wsfe')->login();
+    $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposConcepto();
+
+    $data = [];
+
+    foreach($tipoDoc as $doc){
+        
+        $item = new stdClass;
+        $item->id = $doc->Id;
+        $item->value = "{$doc->Id} - {$doc->Desc}";
         $data[]=$item;
     }
 
     die(json_encode($data));
 });
 
-
 $App->get('home.facturacion', function(){
 
     $post = $this->input->post(); 
 
-    $post->punto_venta = 4002; 
-    $post->tipo = 201;
+    $post->concepto = (int)$post->concepto;
+
+    //$post->punto_venta = 4002; 
+    //$post->tipo = 201;
 
     $AFIP = new Afip(); 
+    $AFIP->service('wsfe')->login();
     $last_voucher = $AFIP->service('wsfe')->factory()->FECompUltimoAutorizado(['PtoVta'=> $post->punto_venta, 'CbteTipo'=> $post->tipo]);
 
     $voucher_number = $last_voucher->CbteNro + 1;
@@ -191,15 +227,7 @@ $App->get('home.facturacion', function(){
             ]                        
         ];
 
-        $cmp_asoc = [
-            [
-                'Tipo' 		=> $post->tipo_asoc, 
-                'PtoVta' 	=> $post->pto_vta_cbte_asoc, 
-                'Nro' 	    => $post->cbte_asoc, 
-                'Cuit' 	    => $post->emisor, 
-                'CbteFch' 	=> intval(date('Ymd', strtotime($post->fecha_cbte_asoc)))
-            ]
-        ];
+
     }
     else{
         $opcionales = [ 
@@ -210,7 +238,15 @@ $App->get('home.facturacion', function(){
         ];        
 
         $fecha_venc_pago = "";
-
+        $cmp_asoc = [
+            [
+                'Tipo' 		=> $post->tipo_asoc, 
+                'PtoVta' 	=> $post->pto_vta_cbte_asoc, 
+                'Nro' 	    => $post->cbte_asoc, 
+                'Cuit' 	    => $post->emisor, 
+                'CbteFch' 	=> intval(date('Ymd', strtotime($post->fecha_cbte_asoc)))
+            ]
+        ];
 
     }
 
@@ -273,6 +309,27 @@ $App->get('home.facturacion', function(){
             ]
         ]
     ];
+
+    if(empty($cmp_asoc)){
+        unset($data['FeCAEReq']['FeDetReq']['FECAEDetRequest']['CbtesAsoc']);
+    }
+
+    if(empty($opcionales)){
+        unset($data['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Opcionales']);
+    }
+
+    if(empty($iva)){
+        unset($data['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Iva']);
+    }
+
+    if(empty($tributo)){
+        unset($data['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Tributos']);
+    }
+
+    if($post->concepto == 1){
+        unset($data['FeCAEReq']['FeDetReq']['FECAEDetRequest']['FchServDesde']);
+        unset($data['FeCAEReq']['FeDetReq']['FECAEDetRequest']['FchServHasta']);
+    }
 
     $result = $AFIP->service('wsfe')->factory()->FECAESolicitar($data);
 

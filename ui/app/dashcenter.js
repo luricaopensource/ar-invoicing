@@ -28,7 +28,31 @@ app.define("app.dashcenter", function()
                                     view    : "combo",
                                     yCount  : "3", 
                                     options : __.req({action:"tipo_factura.combo"}),
-                                    width   : 330
+                                    width   : 330,
+                                    on:{
+                                        onChange: function(tipo, oO){
+
+                                            tipo = parseInt(tipo);
+
+                                            switch(tipo){
+                                                case 201: 
+                                                    $$("facturbo.cbte_asoc").disable();
+                                                    $$("facturbo.pto_vta_cbte_asoc").disable();
+                                                    $$("facturbo.fecha_cbte_asoc").disable();
+                                                    $$("facturbo.tipo_asoc").disable();
+                                                break;
+                                                case 202:
+                                                case 203: 
+                                                    $$("facturbo.cbte_asoc").enable();
+                                                    $$("facturbo.pto_vta_cbte_asoc").enable();
+                                                    $$("facturbo.fecha_cbte_asoc").enable();
+                                                    $$("facturbo.tipo_asoc").enable();
+                                                break;
+                                            }
+
+
+                                        }
+                                    }
                                 },
                                 {},
                                 { 
@@ -44,16 +68,21 @@ app.define("app.dashcenter", function()
                             cols: 
                             [
                                 {
+                                    id      : "facturbo.nro",
                                     name    : "nro", 
                                     label   : "Factura", 
                                     view    : "text",
+                                    readonly:true,
                                     width   : 330
                                 },
                                 {},
                                 {
                                     name    : "concepto", 
                                     label   : "Concepto", 
-                                    view    : "text"
+                                    view    : "combo",
+                                    readonly:true,
+                                    options : __.req({action:"tipo_concepto.combo"}),
+                                    width   : 330
                                 }
                             ]
                         },
@@ -65,6 +94,7 @@ app.define("app.dashcenter", function()
                                     label   : "Tipo Doc.", 
                                     view    : "combo",
                                     options : __.req({action:"tipo_doc.combo"}),
+                                    readonly:true,
                                     width   : 330
                                 },
                                 {},
@@ -82,6 +112,7 @@ app.define("app.dashcenter", function()
                                     name    : "emisor", 
                                     label   : "Emisor", 
                                     view    : "text",
+                                    readonly:true,
                                     width   : 250
                                 },
                                 {
@@ -92,10 +123,25 @@ app.define("app.dashcenter", function()
                                 },
                                 {},
                                 { 
+                                    id: "facturbo.importe_neto",
                                     name        : "importe_neto", 
                                     label       : "Importe Neto", 
                                     labelWidth  : 120, 
-                                    view        : "text"
+                                    view        : "text", 
+                                    on: {
+                                        onchange: function (importe_neto, oO){
+                                            importe_neto = parseFloat(importe_neto);
+
+                                            iva_porc = $$("facturbo.iva_combo").getText(); 
+                                            iva_porc = parseFloat(iva_porc); 
+
+                                            iva_neto = importe_neto * (iva_porc/100);
+
+                                            $$("facturbo.iva").setValue(iva_neto); 
+
+                                            $$("facturbo.total").setValue( importe_neto + iva_neto );
+                                        }
+                                    }
                                 }
                             ]
                         },
@@ -111,17 +157,35 @@ app.define("app.dashcenter", function()
                                 },
                                 {},
                                 { 
+                                    id      : "facturbo.iva",
                                     name    : "iva", 
                                     label   : "IVA", 
                                     width   : 175,
-                                    view    : "text"
+                                    view    : "text",
+                                    readonly:true
                                 },
                                 {
+                                    id      : "facturbo.iva_combo",
                                     name    : "iva_porc",  
                                     view    : "richselect", 
                                     value   : 1,
                                     width   : 75,
-                                    options : __.req({action:"iva.combo"})
+                                    options : __.req({action:"iva.combo"}),
+                                    on:{
+                                        onChange: function(nN,oO, ev){
+
+                                            importe_neto = parseFloat($$("facturbo.importe_neto").getValue());
+
+                                            iva_porc = $$("facturbo.iva_combo").getText(); 
+                                            iva_porc = parseFloat(iva_porc); 
+
+                                            iva_neto = importe_neto * (iva_porc/100);
+
+                                            $$("facturbo.iva").setValue(iva_neto); 
+                                            $$("facturbo.total").setValue( importe_neto + iva_neto );
+
+                                        }
+                                    }
                                 }
                             ]
                         },
@@ -129,9 +193,11 @@ app.define("app.dashcenter", function()
                             cols: 
                             [
                                 { 
+                                    id: "facturbo.total",
                                     name    : "total", 
                                     label   : "Total", 
                                     view    : "text" ,
+                                    readonly:true,
                                     width   : 330
                                 },
                                 {},
@@ -140,7 +206,14 @@ app.define("app.dashcenter", function()
                                     label   : "Moneda", 
                                     view    : "richselect", 
                                     value   : 1,
-                                    options : __.req({action:"moneda.combo"})
+                                    options : __.req({action:"moneda.combo"}),
+                                    on:{
+                                        onChange: function(nN,oO){
+                                            console.log(`moneda(${nN},${oO})`);
+                                            if(nN == 'DOL') $$("facturbo.tyc").enable();
+                                            if(nN == 'PES') $$("facturbo.tyc").disable();
+                                        }
+                                    }
                                 }
                             ]
                         },
@@ -149,9 +222,11 @@ app.define("app.dashcenter", function()
                             [
 
                                 { 
+                                    id      : "facturbo.tyc",
                                     name    : "tyc", 
                                     label   : "T/C", 
                                     view    : "text",
+                                    disable:true,
                                     width   : 250
                                 },
                                 {},
@@ -176,7 +251,8 @@ app.define("app.dashcenter", function()
                                     id      : "facturbo.cae",
                                     name    : "cae", 
                                     label   : "CAE", 
-                                    view    : "text"
+                                    view    : "text",
+                                    readonly:true
                                 }
                             ]
                         },
@@ -192,6 +268,7 @@ app.define("app.dashcenter", function()
                                 },
                                 {},
                                 { 
+                                    id: "facturbo.cbte_asoc",
                                     name        : "cbte_asoc", 
                                     label       : "Cbte. Asociado", 
                                     view        : "text", 
@@ -204,6 +281,7 @@ app.define("app.dashcenter", function()
                             [ 
                                 {},
                                 { 
+                                    id: "facturbo.pto_vta_cbte_asoc",
                                     name        : "pto_vta_cbte_asoc", 
                                     label       : "Pto Vta. Cbte. Asociado", 
                                     view        : "text", 
@@ -216,6 +294,7 @@ app.define("app.dashcenter", function()
                             [ 
                                 {},
                                 { 
+                                    id: "facturbo.fecha_cbte_asoc",
                                     name        : "fecha_cbte_asoc", 
                                     label       : "Fecha Cbte. Asoc", 
                                     view        : "datepicker", 
@@ -228,7 +307,7 @@ app.define("app.dashcenter", function()
                             [ 
                                 {},
                                 {
-                                    id      : "factura.tipo_asoc",
+                                    id      : "facturbo.tipo_asoc",
                                     name    : "tipo_asoc",
                                     label   : "Tipo Cbte. Asoc", 
                                     view    : "combo",
@@ -290,6 +369,7 @@ app.define("app.dashcenter", function()
 
                 if(response.FeDetResp.FECAEDetResponse.Resultado == "A"){
                     $$("facturbo.cae").setValue(response.FeDetResp.FECAEDetResponse.CAE);
+                    $$("facturbo.nro").setValue(response.FeDetResp.FECAEDetResponse.CbteDesde);
 
                     webix.message("Facturacion exitosa! CAE: " + response.FeDetResp.FECAEDetResponse.CAE);
                 }

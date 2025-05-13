@@ -10,3 +10,5 @@
 /app/third_party/afip/config/afip/cache/
 /app/third_party/afip/config/afip/ta/
 /app/third_party/afip/config/afip/dev/dev.log
+
+/var/afip/dev/
