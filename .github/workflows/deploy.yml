@@ -14,6 +14,7 @@ jobs:
       - name: Detectar cambios en infraestructura
         id: check-infra
         run: |
+        
           CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E 'docker-compose\.yml|Dockerfile')
           if [ -n "$CHANGED" ]; then
             echo "INFRA_CHANGED=true" >> $GITHUB_OUTPUT
@@ -35,3 +36,6 @@ jobs:
               docker-compose down
               docker-compose up -d --build
             fi
+
+
+
