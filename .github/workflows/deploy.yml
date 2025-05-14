@@ -12,17 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Detectar cambios en infraestructura
-        id: check-infra
-        run: |
-        
-          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E 'docker-compose\.yml|Dockerfile')
-          if [ -n "$CHANGED" ]; then
-            echo "INFRA_CHANGED=true" >> $GITHUB_OUTPUT
-          else
-            echo "INFRA_CHANGED=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Ejecutar despliegue en EC2
         uses: appleboy/ssh-action@v1
         with:
@@ -33,10 +22,9 @@ jobs:
             cd /home/ubuntu/proyecto
             git pull origin master
             
-            if [ "${{ steps.check-infra.outputs.INFRA_CHANGED }}" = "true" ]; then
-              docker-compose down
-              docker-compose up -d --build
-            fi
+            docker-compose down
+            docker-compose up -d --build
+            
 
 
 
