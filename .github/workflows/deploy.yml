@@ -2,7 +2,7 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:  # Ejecución manual habilitada
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu/proyecto
-            git pull origin main
+            git pull origin master
             
             if [ "${{ steps.check-infra.outputs.INFRA_CHANGED }}" = "true" ]; then
               docker-compose down
