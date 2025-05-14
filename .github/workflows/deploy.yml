@@ -23,6 +23,7 @@ jobs:
             cd /home/ubuntu/proyecto
             git pull origin master
             
+            cd /home/ubuntu/proyecto/docker
             docker-compose down
             docker-compose up -d
             
