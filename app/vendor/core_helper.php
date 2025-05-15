@@ -148,7 +148,7 @@ if (!function_exists('base_url'))
 	{
 		if (isset($_SERVER['HTTP_HOST'])) 
 		{
-			$base_url  = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off'?'https':'http';
+			$base_url  = isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) == 'https' ?'https':'http';
 			$base_url .= '://'.$_SERVER['HTTP_HOST'];
 			$base_url .= str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
 		} 
