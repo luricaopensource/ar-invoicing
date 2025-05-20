@@ -15,6 +15,8 @@ $App->get('index', function ()
 
 $App->get('afip.login', function ()
 {
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
     $AFIP = new Afip();
 
     try{
@@ -32,7 +34,76 @@ $App->get('afip.login', function ()
     die(json_encode($data));
 });
 
+$App->get('account.list', function(){
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $data = $this->db->query("SELECT * FROM usuarios")->result();
+
+    die(json_encode($data));
+});
+
+$App->get('account.row', function($id=0){
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $id = (int)$id; if($id <1) die('{"status": false,"message":"Invalid user id"}'); 
+
+    $user = $this->db->query("SELECT id, nombre, apellido, mail, user, '' as 'pass', tel, tipo, activo FROM usuarios WHERE id = '{$id}'")->first();
+
+    die(json_encode($user));
+});
+
+$App->get('account.update', function(){
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $post = $this->input->post();
+
+    if(!property_exists($post,'id')) {
+        $this->db->query("
+            INSERT 
+                usuarios 
+            SET 
+                nombre  = '{$post->nombre}',
+                apellido= '{$post->apellido}',
+                mail    = '{$post->mail}',
+                user    = '{$post->user}',
+                tel     = '{$post->tel}',
+                tipo    = '{$post->tipo}',
+                activo  = '{$post->activo}',
+                pass    = md5('{$post->pass}')
+        ");
+        die('{"status": true,"message":"Insercion exitosa"}');
+    }
+
+    $post->id= (int)$post->id; if($post->id <1) die('{"status": false,"message":"Invalid user id"}');
+    $passw = ""; if($post->pass) $passw = ", pass = md5('{$post->pass}')";
+
+    $this->db->query("
+        UPDATE 
+            usuarios 
+        SET 
+            nombre  = '{$post->nombre}',
+            apellido= '{$post->apellido}',
+            mail    = '{$post->mail}',
+            user    = '{$post->user}',
+            tel     = '{$post->tel}',
+            tipo    = '{$post->tipo}',
+            activo  = '{$post->activo}'
+            {$passw}
+        WHERE 
+            id = '{$post->id}'
+    ")->first();
+
+    die('{"status": true,"message":"Actualizacion exitosa"}');
+});
+
+
 $App->get('home.stats', function(){
+
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $user = $this->db->query("SELECT * FROM usuarios WHERE id = '{$sessionId}'")->first();
+
+    $user->tel =  $user->tel == "" ? "305000100842" : $user->tel ;
 
     $factura =  new stdClass;
     $factura->tipo              = 201;
@@ -40,7 +111,7 @@ $App->get('home.stats', function(){
     $factura->nro               = "";
     $factura->concepto          = 2;
     $factura->tipo_doc          = "80";
-    $factura->receptor          = "305000100842";
+    $factura->receptor          = $user->tel;
     $factura->emisor            = "33716282819";
     $factura->tipo_agente       = "ADC";
     $factura->importe_neto      = "1000";
@@ -65,35 +136,21 @@ $App->get('home.stats', function(){
 
 $App->get('tipo_factura.combo', function(){
 
-    /*
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfe')->login();
-    $tipo = $AFIP->service('wsfe')->factory()->FEParamGetTiposCbte(); 
-    $data = [];
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
-    foreach($tipo as $row){
-        
-        $item = new stdClass;
-        $item->id = $row->Id;
-        $item->value = str_pad($row->Id, 3, 0, STR_PAD_LEFT)." - {$row->Desc}";
-        $data[]=$item;
-    }
-
-    die(json_encode($data));
-    */
     die('[{"id":201, "value":"201 - FACTURA DE CRÉDITO"}, {"id":202, "value":"202 -NOTA DE DÉBITO"}, {"id":203, "value":"203 - NOTA DE CRÉDITO"}]');
 });
 
 $App->get('tipo_doc.combo', function(){
 
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
     $AFIP = new Afip(); 
     $AFIP->service('wsfe')->login();
     $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposDoc();
-
     $data = [];
 
     foreach($tipoDoc as $doc){
-        
         $item = new stdClass;
         $item->id = $doc->Id;
         $item->value = str_pad($doc->Id, 2, 0, STR_PAD_LEFT)." - {$doc->Desc}";
@@ -106,10 +163,11 @@ $App->get('tipo_doc.combo', function(){
 
 $App->get('pto_vta.combo', function(){
 
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
     $AFIP = new Afip(); 
     $AFIP->service('wsfe')->login();
     $tipo = $AFIP->service('wsfe')->factory()->FEParamGetPtosVenta(); 
-
     $data = [];
 
     foreach($tipo as $row){
@@ -125,59 +183,27 @@ $App->get('pto_vta.combo', function(){
 
 $App->get('iva.combo', function(){
 
-    /*
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfe')->login();
-    $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposIva();
-
-    $data = [];
-
-    foreach($tipoDoc as $doc){
-        
-        $item = new stdClass;
-        $item->id = (int) $doc->Id;
-        $item->value = "{$doc->Id} - {$doc->Desc}";
-        $data[]=$item;
-    }
-
-    die(json_encode($data));
-    */
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
     die('[{"id":3, "value":"0"}, {"id":5, "value":"21"}, {"id":4, "value":"10.5"}]');
 });
 
 $App->get('moneda.combo', function(){
 
-    /*
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfe')->login();
-    $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposMonedas();
-
-    $data = [];
-
-    foreach($tipoDoc as $doc){
-        
-        $item = new stdClass;
-        $item->id = $doc->Id;
-        $item->value = "{$doc->Id} - {$doc->Desc}";
-        $data[]=$item;
-    }
-
-    die(json_encode($data));
-    */
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
      die('[{"id":"PES", "value":"PESOS ARGENTINOS"}, {"id":"DOL", "value":"DOLAR ESTADOUNIDENSE"}]');
 });
 
 
 $App->get('tipo_concepto.combo', function(){
 
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
     $AFIP = new Afip(); 
     $AFIP->service('wsfe')->login();
     $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposConcepto();
-
     $data = [];
 
     foreach($tipoDoc as $doc){
-        
         $item = new stdClass;
         $item->id = $doc->Id;
         $item->value = "{$doc->Id} - {$doc->Desc}";
@@ -189,52 +215,35 @@ $App->get('tipo_concepto.combo', function(){
 
 $App->get('home.facturacion', function(){
 
-    $post = $this->input->post(); 
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
-    $post->concepto = (int)$post->concepto;
-
-    //$post->punto_venta = 4002; 
-    //$post->tipo = 201;
+    $post = $this->input->post();  
+    $post->concepto = (int)$post->concepto; 
 
     $AFIP = new Afip(); 
     $AFIP->service('wsfe')->login();
     $last_voucher = $AFIP->service('wsfe')->factory()->FECompUltimoAutorizado(['PtoVta'=> $post->punto_venta, 'CbteTipo'=> $post->tipo]);
 
     $voucher_number = $last_voucher->CbteNro + 1;
-
     $post->CbteDesde = $voucher_number;
     $post->CbteHasta = $voucher_number;
 
     $opcionales = [];
     $iva = [];
     $tributo = [];
-    $fecha_venc_pago = intval(date('Ymd', strtotime($post->fecha_vto)));
     $cmp_asoc = [];
+    $fecha_venc_pago = intval(date('Ymd', strtotime($post->fecha_vto)));
 
     if($post->tipo == 201){
         $opcionales = [
-            [
-                'Id' 		=> 2101, 
-                'Valor' 	=> $post->cbu
-            ], 
-            [
-                'Id' 		=> 2102, 
-                'Valor' 	=> $post->alias
-            ], 
-            [
-                'Id' 		=> 27, 
-                'Valor' 	=> $post->tipo_agente
-            ]                        
+            [ 'Id' => 2101, 'Valor' => $post->cbu ], 
+            [ 'Id' => 2102, 'Valor' => $post->alias ], 
+            [ 'Id' => 27  , 'Valor' => $post->tipo_agente ]                        
         ];
-
-
     }
     else{
         $opcionales = [ 
-            [
-                'Id' 		=> 22, 
-                'Valor' 	=> 'N'
-            ]                        
+            [ 'Id' => 22, 'Valor' => 'N' ]                        
         ];        
 
         $fecha_venc_pago = "";
@@ -247,37 +256,19 @@ $App->get('home.facturacion', function(){
                 'CbteFch' 	=> intval(date('Ymd', strtotime($post->fecha_cbte_asoc)))
             ]
         ];
-
     }
 
-    
-    $iva = [ // (Opcional) Alícuotas asociadas al comprobante
-        [
-            'Id' 		=> $post->iva_porc, // Id del tipo de IVA (ver tipos disponibles) 
-            'BaseImp' 	=> 100, // Base imponible
-            'Importe' 	=> 21 // Importe 
-        ]
-    ];
-
-    $tributo = [ 
-        [
-            'Id' => 99,
-            'Desc' => "Impuesto Municipal Matanza",
-            'BaseImp' => "100.00",
-            'Alic' =>  "1.00",
-            'Importe' => "1.00" 
-        ]
-    ];
-
+    $iva        = [ [ 'Id' => $post->iva_porc, 'BaseImp' => 100, 'Importe' => 21  ] ];
+    $tributo    = [ [ 'Id' => 99, 'Desc' => "Impuesto Municipal Matanza", 'BaseImp' => "100.00", 'Alic' =>  "1.00", 'Importe' => "1.00" ]];
 
     $data = 
     [
         'FeCAEReq' => 
         [
             'FeCabReq' => [
-                'CantReg' 		=> $post->CbteHasta-$post->CbteDesde+1, // Cantidad de comprobantes a registrar
-                'PtoVta' 		=> $post->punto_venta, // Punto de venta
-                'CbteTipo' 		=> $post->tipo, // Tipo de comprobante (ver tipos disponibles) 
+                'CantReg' => $post->CbteHasta-$post->CbteDesde+1, // Cantidad de comprobantes a registrar
+                'PtoVta' => $post->punto_venta, // Punto de venta
+                'CbteTipo' => $post->tipo, // Tipo de comprobante (ver tipos disponibles) 
             ],
             'FeDetReq' => [ 
                 'FECAEDetRequest' => [
@@ -298,13 +289,11 @@ $App->get('home.facturacion', function(){
                     'FchVtoPago' 	=> $fecha_venc_pago, // (Opcional) Fecha de vencimiento del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
                     'MonId' 		=> $post->moneda, //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos) 
                     'MonCotiz' 		=> 1, // Cotización de la moneda usada (1 para pesos argentinos)  
-                    //'CanMisMonExt'  => 0,
                     'CondicionIVAReceptorId'=> 1, 
                     'CbtesAsoc' 	=> $cmp_asoc,
                     'Tributos' 		=> $tributo, 
                     'Iva' 			=> $iva, 
                     'Opcionales' 	=> $opcionales, 
-                    //'Compradores' 	=> []
                 ]
             ]
         ]

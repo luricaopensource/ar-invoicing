@@ -289,12 +289,16 @@ class core {
         //obtain method from rewrited url simple (without regex)
         $method = $this->match_simple();
 
+        
+
         $PARAM  = array();
 
         if($method == FALSE)
         { 
             //obtain method from rewrited url simple (with regex)
             $method = $this->match_params();
+
+            
 
             if($method == FALSE)
             {
@@ -309,16 +313,19 @@ class core {
             }
         }
 
+        
+
         if($method == $this->default_method  )
         {
             //if default method work with GET's param
             $method = isset($_GET[ $this->default_key ]) ? $_GET[ $this->default_key ] : FALSE ; if ($method == FALSE) { $method = $this->default_method; }
             $PARAM  = $_GET;
+ 
         }
-		
+
 		//Version 4.0.2 
         //support console commands
-        if( isset($_SERVER["argv"]) )
+        if( php_sapi_name() === 'cli' )
         {  
             foreach ($_SERVER["argv"] as $k => $item) 
             {  
@@ -337,10 +344,11 @@ class core {
                 }
             }  
         }
+        
  
         $this->page = $method ; 
 
-
+        
         //method found?
         if ($method)
         { 
@@ -384,7 +392,7 @@ class core {
             }
             else
             {
-                _LOG($this, __CLASS__, "The method {$method} isn't exists");
+                _LOG($this, __CLASS__, "The method {$method} isn't exists (isset)");
             }
         }
         else
