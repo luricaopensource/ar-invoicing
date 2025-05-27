@@ -80,7 +80,7 @@ app.define("app.dashcenter", function()
                                     name    : "concepto", 
                                     label   : "Concepto", 
                                     view    : "combo",
-                                    readonly:true,
+                                    /*readonly:true,*/
                                     options : __.req({action:"tipo_concepto.combo"}),
                                     width   : 330
                                 }
