@@ -67,7 +67,8 @@ app.define("sys.widget.login",function()
                             view  : "button"    , 
                             value : "INGRESAR"  , 
                             css   : "btn"       ,  
-                            width : 100
+                            width : 100,
+                            click : onSubmit
                         }
                     ]
                 }
