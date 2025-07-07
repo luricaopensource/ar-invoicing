@@ -115,7 +115,7 @@ $App->get('home.stats', function(){
     $factura->emisor            = "33716282819";
     $factura->tipo_agente       = "ADC";
     $factura->importe_neto      = "1000";
-    $factura->fecha_vto         = "2025-06-15";
+    $factura->fecha_vto         = date("Y-m-d", time());
     $factura->iva               = "210";
     $factura->iva_porc          = 5;
     $factura->total             = "1210";
