@@ -330,7 +330,6 @@ $App->get('service.consultarComprobantes', function(){
     //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->payload();  
-
     $data = json_decode( json_encode($post->payload), true );
 
     $AFIP = new Afip(); 
@@ -346,7 +345,6 @@ $App->get('service.consultarCtasCtes', function(){
     //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->payload();  
-
     $data = json_decode( json_encode($post->payload), true );
 
     $AFIP = new Afip(); 
@@ -362,7 +360,6 @@ $App->get('service.consultarCtaCte', function(){
     //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->payload();  
-
     $data = json_decode( json_encode($post->payload), true );
 
     $AFIP = new Afip(); 
@@ -378,7 +375,6 @@ $App->get('service.aceptarFECred', function(){
     //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->payload();  
-
     $data = json_decode( json_encode($post->payload), true );
 
     $AFIP = new Afip(); 
@@ -394,7 +390,6 @@ $App->get('service.informarFacturaAgtDptoCltv', function(){
     //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->payload();  
-
     $data = json_decode( json_encode($post->payload), true );
 
     $AFIP = new Afip(); 
@@ -410,7 +405,6 @@ $App->get('service.modificarOpcionTransferencia', function(){
     //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->payload();  
-
     $data = json_decode( json_encode($post->payload), true );
 
     $AFIP = new Afip(); 
