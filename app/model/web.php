@@ -337,6 +337,7 @@ $App->get('service.consultarComprobantes', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->consultarComprobantes( $data, FALSE, TRUE );
 
+    header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
 });
 
@@ -352,6 +353,7 @@ $App->get('service.consultarCtasCtes', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->ConsultarCtasCtes( $data );
 
+    header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
 });
 
@@ -367,6 +369,7 @@ $App->get('service.consultarCtaCte', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->consultarCtaCte( $data );
 
+    header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
 });
 
@@ -382,6 +385,7 @@ $App->get('service.aceptarFECred', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->aceptarFECred( $data );
 
+    header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
 });
 
@@ -397,6 +401,7 @@ $App->get('service.informarFacturaAgtDptoCltv', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->informarFacturaAgtDptoCltv( $data );
 
+    header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
 });
 
@@ -412,5 +417,6 @@ $App->get('service.modificarOpcionTransferencia', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->modificarOpcionTransferencia( $data );
 
+    header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
 });
