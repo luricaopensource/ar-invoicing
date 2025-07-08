@@ -324,3 +324,99 @@ $App->get('home.facturacion', function(){
 
     die(json_encode($result));
 });
+
+$App->get('service.consultarComprobantes', function(){
+
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $post = $this->input->post();  
+
+    $data = json_decode( json_encode($post->payload), true );
+
+    $AFIP = new Afip(); 
+    $AFIP->service('wsfecred')->login();
+    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $AFIP->service('wsfecred')->factory()->consultarComprobantes( $data );
+
+    die(json_encode($result));
+});
+
+$App->get('service.consultarCtasCtes', function(){
+
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $post = $this->input->post();  
+
+    $data = json_decode( json_encode($post->payload), true );
+
+    $AFIP = new Afip(); 
+    $AFIP->service('wsfecred')->login();
+    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $AFIP->service('wsfecred')->factory()->ConsultarCtasCtes( $data );
+
+    die(json_encode($result));
+});
+
+$App->get('service.consultarCtaCte', function(){
+
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $post = $this->input->post();  
+
+    $data = json_decode( json_encode($post->payload), true );
+
+    $AFIP = new Afip(); 
+    $AFIP->service('wsfecred')->login();
+    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $AFIP->service('wsfecred')->factory()->consultarCtaCte( $data );
+
+    die(json_encode($result));
+});
+
+$App->get('service.aceptarFECred', function(){
+
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $post = $this->input->post();  
+
+    $data = json_decode( json_encode($post->payload), true );
+
+    $AFIP = new Afip(); 
+    $AFIP->service('wsfecred')->login();
+    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $AFIP->service('wsfecred')->factory()->aceptarFECred( $data );
+
+    die(json_encode($result));
+});
+
+$App->get('service.informarFacturaAgtDptoCltv', function(){
+
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $post = $this->input->post();  
+
+    $data = json_decode( json_encode($post->payload), true );
+
+    $AFIP = new Afip(); 
+    $AFIP->service('wsfecred')->login();
+    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $AFIP->service('wsfecred')->factory()->informarFacturaAgtDptoCltv( $data );
+
+    die(json_encode($result));
+});
+
+$App->get('service.modificarOpcionTransferencia', function(){
+
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $post = $this->input->post();  
+
+    $data = json_decode( json_encode($post->payload), true );
+
+    $AFIP = new Afip(); 
+    $AFIP->service('wsfecred')->login();
+    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $AFIP->service('wsfecred')->factory()->modificarOpcionTransferencia( $data );
+
+    die(json_encode($result));
+});
