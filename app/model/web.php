@@ -232,7 +232,14 @@ $App->get('home.facturacion', function(){
     $iva = [];
     $tributo = [];
     $cmp_asoc = [];
-    $fecha_venc_pago = intval(date('Ymd', strtotime($post->fecha_vto)));
+
+    // Primer día del mes actual
+    $FchServDesde = date('Ym01');
+
+    // Último día del mes actual
+    $FchServHasta = date('Ymt');
+
+    $fecha_venc_pago = intval(date('Ymd', strtotime("+3 months", strtotime($post->fecha_vto))));
 
     if($post->tipo == 201){
         $opcionales = [
@@ -258,8 +265,9 @@ $App->get('home.facturacion', function(){
         ];
     }
 
-    $iva        = [ [ 'Id' => $post->iva_porc, 'BaseImp' => 100, 'Importe' => 21  ] ];
-    $tributo    = [ [ 'Id' => 99, 'Desc' => "Impuesto Municipal Matanza", 'BaseImp' => "100.00", 'Alic' =>  "1.00", 'Importe' => "1.00" ]];
+    $iva = [ [ 'Id' => $post->iva_porc, 'BaseImp' => $post->importe_neto, 'Importe' => $post->iva  ] ];
+    //$tributo = [ [ 'Id' => 99, 'Desc' => "Impuesto Municipal Matanza", 'BaseImp' => "100.00", 'Alic' =>  "1.00", 'Importe' => "1.00" ]];
+    $tributo =[];
 
     $data = 
     [
@@ -267,25 +275,25 @@ $App->get('home.facturacion', function(){
         [
             'FeCabReq' => [
                 'CantReg' => $post->CbteHasta-$post->CbteDesde+1, // Cantidad de comprobantes a registrar
-                'PtoVta' => $post->punto_venta, // Punto de venta
-                'CbteTipo' => $post->tipo, // Tipo de comprobante (ver tipos disponibles) 
+                'PtoVta' => (int)$post->punto_venta, // Punto de venta
+                'CbteTipo' => (int)$post->tipo, // Tipo de comprobante (ver tipos disponibles) 
             ],
             'FeDetReq' => [ 
                 'FECAEDetRequest' => [
                     'Concepto' 		=> $post->concepto, // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
                     'DocTipo' 		=> $post->tipo_doc, // Tipo de documento del comprador (ver tipos disponibles)
-                    'DocNro' 		=> "33693450239", // Numero de documento del comprador
+                    'DocNro' 		=> $post->receptor, // Numero de documento del comprador
                     'CbteDesde' 	=> $post->CbteDesde, // Numero de comprobante o numero del primer comprobante en caso de ser mas de uno
                     'CbteHasta' 	=> $post->CbteHasta, // Numero de comprobante o numero del ultimo comprobante en caso de ser mas de uno
                     'CbteFch' 		=> intval(date('Ymd', time())), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
-                    'ImpTotal' 		=> "122.00", // Importe total del comprobante
+                    'ImpTotal' 		=> $post->total, // Importe total del comprobante
                     'ImpTotConc' 	=> "0.00", // Importe neto no gravado
-                    'ImpNeto' 		=> "100.00", // Importe neto gravado
+                    'ImpNeto' 		=> $post->importe_neto, // Importe neto gravado
                     'ImpOpEx' 		=> "0.00", // Importe exento de IVA
-                    'ImpIVA' 		=> "21.00", //Importe total de IVA
-                    'ImpTrib' 		=> "1.00", //Importe total de tributos
-                    'FchServDesde' 	=> "20190101", // (Opcional) Fecha de inicio del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
-                    'FchServHasta' 	=> "20190131", // (Opcional) Fecha de fin del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
+                    'ImpIVA' 		=> $post->iva, //Importe total de IVA
+                    'ImpTrib' 		=> $post->iva, //Importe total de tributos
+                    'FchServDesde' 	=> $FchServDesde, // (Opcional) Fecha de inicio del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
+                    'FchServHasta' 	=> $FchServHasta, // (Opcional) Fecha de fin del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
                     'FchVtoPago' 	=> $fecha_venc_pago, // (Opcional) Fecha de vencimiento del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
                     'MonId' 		=> $post->moneda, //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos) 
                     'MonCotiz' 		=> 1, // Cotización de la moneda usada (1 para pesos argentinos)  
