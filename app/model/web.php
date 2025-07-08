@@ -327,7 +327,7 @@ $App->get('home.facturacion', function(){
 
 $App->get('service.consultarComprobantes', function(){
 
-    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+    //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->post();  
 
@@ -343,7 +343,7 @@ $App->get('service.consultarComprobantes', function(){
 
 $App->get('service.consultarCtasCtes', function(){
 
-    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+    //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->post();  
 
@@ -359,7 +359,7 @@ $App->get('service.consultarCtasCtes', function(){
 
 $App->get('service.consultarCtaCte', function(){
 
-    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+    //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->post();  
 
@@ -375,7 +375,7 @@ $App->get('service.consultarCtaCte', function(){
 
 $App->get('service.aceptarFECred', function(){
 
-    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+    //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->post();  
 
@@ -391,7 +391,7 @@ $App->get('service.aceptarFECred', function(){
 
 $App->get('service.informarFacturaAgtDptoCltv', function(){
 
-    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+    //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->post();  
 
@@ -407,7 +407,7 @@ $App->get('service.informarFacturaAgtDptoCltv', function(){
 
 $App->get('service.modificarOpcionTransferencia', function(){
 
-    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+    //$sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     $post = $this->input->post();  
 
