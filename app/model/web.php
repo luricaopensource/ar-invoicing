@@ -239,6 +239,10 @@ $App->get('home.facturacion', function(){
     // Último día del mes actual
     $FchServHasta = date('Ymt');
 
+    $post->total        = (float) $post->total;
+    $post->importe_neto = (float) $post->importe_neto;
+    $post->iva          = (float) $post->iva;
+    
     $fecha_venc_pago = intval(date('Ymd', strtotime("+3 months", strtotime($post->fecha_vto))));
 
     if($post->tipo == 201){
@@ -286,12 +290,12 @@ $App->get('home.facturacion', function(){
                     'CbteDesde' 	=> $post->CbteDesde, // Numero de comprobante o numero del primer comprobante en caso de ser mas de uno
                     'CbteHasta' 	=> $post->CbteHasta, // Numero de comprobante o numero del ultimo comprobante en caso de ser mas de uno
                     'CbteFch' 		=> intval(date('Ymd', time())), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
-                    'ImpTotal' 		=> $post->total, // Importe total del comprobante
+                    'ImpTotal' 		=> number_format($post->total,2,".",""), // Importe total del comprobante
                     'ImpTotConc' 	=> "0.00", // Importe neto no gravado
-                    'ImpNeto' 		=> $post->importe_neto, // Importe neto gravado
+                    'ImpNeto' 		=> number_format($post->importe_neto,2,".",""), // Importe neto gravado
                     'ImpOpEx' 		=> "0.00", // Importe exento de IVA
-                    'ImpIVA' 		=> $post->iva, //Importe total de IVA
-                    'ImpTrib' 		=> $post->iva, //Importe total de tributos
+                    'ImpIVA' 		=> number_format($post->iva,2,".",""), //Importe total de IVA
+                    'ImpTrib' 		=> "0.00", //Importe total de tributos
                     'FchServDesde' 	=> $FchServDesde, // (Opcional) Fecha de inicio del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
                     'FchServHasta' 	=> $FchServHasta, // (Opcional) Fecha de fin del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
                     'FchVtoPago' 	=> $fecha_venc_pago, // (Opcional) Fecha de vencimiento del servicio (yyyymmdd), obligatorio para Concepto 2 y 3
