@@ -337,7 +337,8 @@ $App->get('service.consultarComprobantes', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->consultarComprobantes( $data );
 
-    die(json_encode($result));
+    var_dump($result);
+    die();
 });
 
 $App->get('service.consultarCtasCtes', function(){
@@ -352,7 +353,8 @@ $App->get('service.consultarCtasCtes', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->ConsultarCtasCtes( $data );
 
-    die(json_encode($result));
+    var_dump($result);
+    die();
 });
 
 $App->get('service.consultarCtaCte', function(){
@@ -367,7 +369,8 @@ $App->get('service.consultarCtaCte', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->consultarCtaCte( $data );
 
-    die(json_encode($result));
+    var_dump($result);
+    die();
 });
 
 $App->get('service.aceptarFECred', function(){
@@ -382,7 +385,8 @@ $App->get('service.aceptarFECred', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->aceptarFECred( $data );
 
-    die(json_encode($result));
+    var_dump($result);
+    die();
 });
 
 $App->get('service.informarFacturaAgtDptoCltv', function(){
@@ -397,7 +401,8 @@ $App->get('service.informarFacturaAgtDptoCltv', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->informarFacturaAgtDptoCltv( $data );
 
-    die(json_encode($result));
+    var_dump($result);
+    die();
 });
 
 $App->get('service.modificarOpcionTransferencia', function(){
@@ -412,5 +417,6 @@ $App->get('service.modificarOpcionTransferencia', function(){
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $AFIP->service('wsfecred')->factory()->modificarOpcionTransferencia( $data );
 
-    die(json_encode($result));
+    var_dump($result);
+    die();
 });
