@@ -335,7 +335,7 @@ $App->get('service.consultarComprobantes', function(){
     $AFIP = new Afip(); 
     $AFIP->service('wsfecred')->login();
     $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
-    $result = $AFIP->service('wsfecred')->factory()->consultarComprobantes( $data );
+    $result = $AFIP->service('wsfecred')->factory()->consultarComprobantes( $data, FALSE, TRUE );
 
     var_dump($result);
     die();
