@@ -193,6 +193,25 @@ $App->get('moneda.combo', function(){
      die('[{"id":"PES", "value":"PESOS ARGENTINOS"}, {"id":"DOL", "value":"DOLAR ESTADOUNIDENSE"}]');
 });
 
+$App->get('tipos_opcionales.combo', function(){
+
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $AFIP = new Afip(); 
+    $AFIP->service('wsfe')->login();
+    $tiposOpcionales = $AFIP->service('wsfe')->factory()->FEParamGetTiposOpcional();
+    $data = [];
+
+    foreach($tiposOpcionales as $tipo){
+        $item = new stdClass;
+        $item->id = $tipo->Id;
+        $item->value = "{$tipo->Id} - {$tipo->Desc}";
+        $data[]=$item;
+    }
+
+    die(json_encode($data));
+});
+
 
 $App->get('tipo_concepto.combo', function(){
 
@@ -247,14 +266,14 @@ $App->get('home.facturacion', function(){
 
     if($post->tipo == 201){
         $opcionales = [
-            [ 'Id' => 2101, 'Valor' => $post->cbu ], 
-            [ 'Id' => 2102, 'Valor' => $post->alias ], 
-            [ 'Id' => 27  , 'Valor' => $post->tipo_agente ]                        
+            [ 'Id' => '2101', 'Valor' => $post->cbu ], 
+            [ 'Id' => '2102', 'Valor' => $post->alias ], 
+            [ 'Id' => '27'  , 'Valor' => $post->tipo_agente ]                        
         ];
         
         // Agregar orden de compra si está presente
         if(!empty($post->orden_compra)){
-            $opcionales[] = [ 'Id' => 2103, 'Valor' => $post->orden_compra ];
+            $opcionales[] = [ 'Id' => '2103', 'Valor' => $post->orden_compra ];
         }
     }
     else{
@@ -263,7 +282,7 @@ $App->get('home.facturacion', function(){
         $valor_anulacion = $es_anulacion ? 'S' : 'N';
         
         $opcionales = [ 
-            [ 'Id' => 22, 'Valor' => $valor_anulacion ]                        
+            [ 'Id' => '22', 'Valor' => $valor_anulacion ]                        
         ];        
 
         $fecha_venc_pago = "";
@@ -361,6 +380,16 @@ $App->get('home.facturacion', function(){
     $result = $AFIP->service('wsfe')->factory()->FECAESolicitar($data);
 
     die(json_encode($result));
+});
+
+$App->get('debug.tipos_opcionales', function(){
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+
+    $AFIP = new Afip(); 
+    $AFIP->service('wsfe')->login();
+    $tiposOpcionales = $AFIP->service('wsfe')->factory()->FEParamGetTiposOpcional();
+    
+    die(json_encode($tiposOpcionales));
 });
 
 $App->get('service.consultarComprobantes', function(){
