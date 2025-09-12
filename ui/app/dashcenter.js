@@ -312,7 +312,7 @@ app.define("app.dashcenter", function()
                                     label   : "Tipo Cbte. Asoc", 
                                     view    : "combo",
                                     yCount  : "3", 
-                                    options : ["91", "88", "988", "990", "991", "993", "994", "995", "996", "997"],
+                                    options : ["91", "88", "988", "990", "991", "993", "994", "995", "996", "997", "201"],
                                     width   : 330
                                 }
                             ]
