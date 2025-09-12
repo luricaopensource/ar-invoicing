@@ -264,35 +264,29 @@ $App->get('home.facturacion', function(){
         $fecha_venc_pago = "";
         
         // Configurar comprobante asociado para Notas de Crédito y Débito
-        // Debug: verificar qué campos están llegando
-        $debug_campos = [
-            'tipo_asoc' => isset($post->tipo_asoc) ? $post->tipo_asoc : 'NO DEFINIDO',
-            'cbte_asoc' => isset($post->cbte_asoc) ? $post->cbte_asoc : 'NO DEFINIDO',
-            'fecha_cbte_asoc' => isset($post->fecha_cbte_asoc) ? $post->fecha_cbte_asoc : 'NO DEFINIDO',
-            'pto_vta_cbte_asoc' => isset($post->pto_vta_cbte_asoc) ? $post->pto_vta_cbte_asoc : 'NO DEFINIDO'
-        ];
-        
         if(!empty($post->tipo_asoc) && !empty($post->cbte_asoc) && !empty($post->fecha_cbte_asoc)){
+            // Convertir la fecha a formato AFIP (YYYYMMDD)
+            $fecha_afip = '';
+            if(is_string($post->fecha_cbte_asoc)){
+                // Si viene como string, convertir a timestamp y luego a formato AFIP
+                $timestamp = strtotime($post->fecha_cbte_asoc);
+                if($timestamp !== false){
+                    $fecha_afip = date('Ymd', $timestamp);
+                }
+            } else {
+                // Si viene como timestamp, convertir directamente
+                $fecha_afip = date('Ymd', $post->fecha_cbte_asoc);
+            }
+            
             $cmp_asoc = [
                 [
-                    'Tipo' 		=> $post->tipo_asoc, 
-                    'PtoVta' 	=> $post->pto_vta_cbte_asoc, 
-                    'Nro' 	    => $post->cbte_asoc, 
+                    'Tipo' 		=> (int)$post->tipo_asoc, 
+                    'PtoVta' 	=> (int)$post->pto_vta_cbte_asoc, 
+                    'Nro' 	    => (int)$post->cbte_asoc, 
                     'Cuit' 	    => $post->emisor, 
-                    'CbteFch' 	=> intval(date('Ymd', strtotime($post->fecha_cbte_asoc)))
+                    'CbteFch' 	=> (int)$fecha_afip
                 ]
             ];
-        } else {
-            // Debug: mostrar por qué no se está configurando el comprobante asociado
-            die(json_encode([
-                'error' => 'Campos del comprobante asociado incompletos',
-                'debug' => $debug_campos,
-                'validacion' => [
-                    'tipo_asoc_empty' => empty($post->tipo_asoc),
-                    'cbte_asoc_empty' => empty($post->cbte_asoc),
-                    'fecha_cbte_asoc_empty' => empty($post->fecha_cbte_asoc)
-                ]
-            ]));
         }
     }
 
