@@ -271,9 +271,9 @@ $App->get('home.facturacion', function(){
             [ 'Id' => '27'  , 'Valor' => $post->tipo_agente ]                        
         ];
         
-        // Agregar orden de compra si está presente
+        // Agregar orden de compra si está presente (usando Referencia Comercial)
         if(!empty($post->orden_compra)){
-            $opcionales[] = [ 'Id' => '2103', 'Valor' => $post->orden_compra ];
+            $opcionales[] = [ 'Id' => '23', 'Valor' => $post->orden_compra ];
         }
     }
     else{

@@ -264,7 +264,7 @@ app.define("app.dashcenter", function()
                                 { 
                                     id          : "facturbo.orden_compra",
                                     name        : "orden_compra", 
-                                    label       : "Orden de Compra", 
+                                    label       : "Referencia Comercial", 
                                     view        : "text", 
                                     labelWidth  : 150,
                                     width       : 330
