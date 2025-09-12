@@ -115,7 +115,7 @@ $App->get('home.stats', function(){
     $factura->emisor            = "33716282819";
     $factura->tipo_agente       = "ADC";
     $factura->importe_neto      = "1000";
-    $factura->fecha_vto         = date("Y-m-d", time());
+    $factura->fecha_vto         = date("Y-m-d", strtotime("+3 months"));
     $factura->iva               = "210";
     $factura->iva_porc          = 5;
     $factura->total             = "1210";
@@ -243,7 +243,7 @@ $App->get('home.facturacion', function(){
     $post->importe_neto = (float) $post->importe_neto;
     $post->iva          = (float) $post->iva;
     
-    $fecha_venc_pago = intval(date('Ymd', strtotime("+3 months", strtotime($post->fecha_vto))));
+    $fecha_venc_pago = intval(date('Ymd', strtotime($post->fecha_vto)));
 
     if($post->tipo == 201){
         $opcionales = [
