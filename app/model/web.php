@@ -251,6 +251,11 @@ $App->get('home.facturacion', function(){
             [ 'Id' => 2102, 'Valor' => $post->alias ], 
             [ 'Id' => 27  , 'Valor' => $post->tipo_agente ]                        
         ];
+        
+        // Agregar orden de compra si está presente
+        if(!empty($post->orden_compra)){
+            $opcionales[] = [ 'Id' => 2103, 'Valor' => $post->orden_compra ];
+        }
     }
     else{
         // Para Notas de Crédito y Débito, verificar si es anulación

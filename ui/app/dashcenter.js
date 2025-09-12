@@ -40,6 +40,7 @@ app.define("app.dashcenter", function()
                                                     $$("facturbo.pto_vta_cbte_asoc").disable();
                                                     $$("facturbo.fecha_cbte_asoc").disable();
                                                     $$("facturbo.tipo_asoc").disable();
+                                                    $$("facturbo.orden_compra").enable();
                                                 break;
                                                 case 202:
                                                 case 203: 
@@ -47,6 +48,7 @@ app.define("app.dashcenter", function()
                                                     $$("facturbo.pto_vta_cbte_asoc").enable();
                                                     $$("facturbo.fecha_cbte_asoc").enable();
                                                     $$("facturbo.tipo_asoc").enable();
+                                                    $$("facturbo.orden_compra").disable();
                                                 break;
                                             }
 
@@ -260,6 +262,7 @@ app.define("app.dashcenter", function()
                             cols: 
                             [
                                 { 
+                                    id          : "facturbo.orden_compra",
                                     name        : "orden_compra", 
                                     label       : "Orden de Compra", 
                                     view        : "text", 
