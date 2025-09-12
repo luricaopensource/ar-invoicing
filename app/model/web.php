@@ -253,8 +253,12 @@ $App->get('home.facturacion', function(){
         ];
     }
     else{
+        // Para Notas de Crédito y Débito, verificar si es anulación
+        $es_anulacion = isset($post->es_anulacion) && $post->es_anulacion == '1';
+        $valor_anulacion = $es_anulacion ? 'S' : 'N';
+        
         $opcionales = [ 
-            [ 'Id' => 22, 'Valor' => 'N' ]                        
+            [ 'Id' => 22, 'Valor' => $valor_anulacion ]                        
         ];        
 
         $fecha_venc_pago = "";
