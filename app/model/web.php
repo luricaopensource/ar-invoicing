@@ -258,15 +258,19 @@ $App->get('home.facturacion', function(){
         ];        
 
         $fecha_venc_pago = "";
-        $cmp_asoc = [
-            [
-                'Tipo' 		=> $post->tipo_asoc, 
-                'PtoVta' 	=> $post->pto_vta_cbte_asoc, 
-                'Nro' 	    => $post->cbte_asoc, 
-                'Cuit' 	    => $post->emisor, 
-                'CbteFch' 	=> intval(date('Ymd', strtotime($post->fecha_cbte_asoc)))
-            ]
-        ];
+        
+        // Configurar comprobante asociado para Notas de Crédito y Débito
+        if(!empty($post->tipo_asoc) && !empty($post->cbte_asoc) && !empty($post->fecha_cbte_asoc)){
+            $cmp_asoc = [
+                [
+                    'Tipo' 		=> $post->tipo_asoc, 
+                    'PtoVta' 	=> $post->pto_vta_cbte_asoc, 
+                    'Nro' 	    => $post->cbte_asoc, 
+                    'Cuit' 	    => $post->emisor, 
+                    'CbteFch' 	=> intval(date('Ymd', strtotime($post->fecha_cbte_asoc)))
+                ]
+            ];
+        }
     }
 
     $iva = [ [ 'Id' => $post->iva_porc, 'BaseImp' => $post->importe_neto, 'Importe' => $post->iva  ] ];
