@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: lurica-mysql
--- Tiempo de generación: 10-04-2025 a las 21:07:42
+-- Tiempo de generación: 22-09-2025 a las 19:02:14
 -- Versión del servidor: 10.6.11-MariaDB
 -- Versión de PHP: 8.2.28
 
@@ -38,6 +38,13 @@ CREATE TABLE `session` (
   `login_at` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'Fecha Login'
 ) ENGINE=MEMORY DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `session`
+--
+
+INSERT INTO `session` (`ip`, `last_time`, `store`, `id_user`, `type`, `cookie`, `expire`, `login_at`) VALUES
+('172.18.0.1', '2025-09-22 19:02:11', '0', 1, 'invoicing', '68d19c601915b', 60, '2025-09-22 18:58:40');
+
 -- --------------------------------------------------------
 
 --
@@ -61,7 +68,8 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `nombre`, `apellido`, `tipo`, `user`, `pass`, `mail`, `tel`, `activo`) VALUES
-(1, 'Demo', 'Demo', 1, 'demo', 'fe01ce2a7fbac8fafaed7c982a04e229', '', '', 1);
+(1, 'Demo', 'Demo', 1, 'demo', 'fe01ce2a7fbac8fafaed7c982a04e229', '', '30500010084', 1),
+(3, 'test', 'test', 1, 'test', '098f6bcd4621d373cade4e832627b4f6', '', '', 1);
 
 -- --------------------------------------------------------
 
@@ -108,7 +116,7 @@ ALTER TABLE `usuarios_tipo`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios_tipo`

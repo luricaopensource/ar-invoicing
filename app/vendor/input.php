@@ -241,4 +241,51 @@ class input
 		return json_encode($obj);
 	}
 
+    public function getCommandList(){
+        $param=[];
+        $argv = isset($_SERVER['argv']) ? $_SERVER['argv'] : []; 
+        if(isset($argv[0])) unset($argv[0]); 
+
+        foreach($argv as $item){
+            preg_match('/--(\w+)=/', $item, $matches); 
+    
+            if(isset($matches[1])){
+                $label = $matches[1];
+                $value = str_replace("--{$label}=","", $item);
+                $param[$label]=$value;
+            }
+        }
+
+        return $param;
+    }
+
+    public function command($key=''){
+
+        $param = $this->getCommandList();
+
+        if($key)
+        {
+            $ret = isset($param[$key]) ? $param[$key] : FALSE;
+        }
+        else
+        {
+            $ret = new stdclass;
+
+            foreach ($param as $key => $value) {
+                $ret->{$key} = $value;
+            }
+        }
+
+        return $ret;
+
+    }
+
+    public function has_command()
+	{
+        $param = $this->getCommandList();
+
+		return count($param)>0 ? TRUE : FALSE;
+	}   
+   
+
 }

@@ -163,7 +163,13 @@ class AfipAuthService {
 
         $this->logger->log(self::TAG, "checkCertificate: {$this->fileCRT}");
 
-        $certData = openssl_x509_parse(file_get_contents($this->fileCRT));
+        $crtRawData = file_get_contents($this->fileCRT);
+
+        $this->checkStreamCertificate($crtRawData);
+    }
+
+    private function checkStreamCertificate($text){
+        $certData   = openssl_x509_parse($text);
 
         $actual_time 		= new DateTime(date('c', time() ));
         $expiration_time 	= new DateTime(date('c', $certData['validTo_time_t'] ));

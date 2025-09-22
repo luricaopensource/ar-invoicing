@@ -1,16 +1,18 @@
 {
 	"loader":
 	[
-        {"module":"Parser"          ,"library":{ "class":"Parser", "rename":"parser" }, "file":"app\/vendor\/Parser" }, 
-        {"module":"Dataset"         ,"library":{ "class":"Dataset","rename":"data" }, "file":"app\/vendor\/Dataset" },
-        {"module":"database_result" ,"library":{"class":"database_result"}, "file":"app\/vendor\/database_result" }, 
-        {"module":"database"        ,"library":{"class":"database","rename":"db"}, "file":"app\/vendor\/database" },
-        {"module":"Telepatia"       ,"library":{"class":"Telepatia","rename":"session" }, "file":"app\/vendor\/Telepatia" }, 
-        {"module":"input"           ,"library":{"class":"input"}, "file":"app\/vendor\/input" },
-        {"file":"app\/model\/auth" , "helper":true },
-		{"file":"app\/model\/web" , "helper":true } 
+        {"module":"Parser"          ,"library":{ "class":"Parser"   , "rename":"parser"     }, "file":"app\/vendor\/Parser"             }, 
+        {"module":"Dataset"         ,"library":{ "class":"Dataset"  , "rename":"data"       }, "file":"app\/vendor\/Dataset"            },
+        {"module":"database_result" ,"library":{ "class":"database_result"                  }, "file":"app\/vendor\/database_result"    }, 
+        {"module":"database"        ,"library":{ "class":"database" , "rename":"db"         }, "file":"app\/vendor\/database"           },
+        {"module":"Telepatia"       ,"library":{ "class":"Telepatia", "rename":"session"    }, "file":"app\/vendor\/Telepatia"          }, 
+        {"module":"input"           ,"library":{ "class":"input"                            }, "file":"app\/vendor\/input"              },
+        {"module":"output"          ,"library":{ "class":"output"                           }, "file":"app\/vendor\/output"             },
+        {"module":"logging"         ,"library":{ "class":"logging", "rename":"logger"       }, "file":"app\/vendor\/logging"            },
+        {"file":"app\/model\/auth"  , "helper":true },
+		{"file":"app\/model\/web"   , "helper":true } 
 	],
-    "debug"          : true    ,
+    "debug"          : true     ,
     "error"          : "On"     ,
     "leak"           : "50M"    ,
     "timezone"       : "America/Argentina/Buenos_Aires",
