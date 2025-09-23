@@ -56,7 +56,8 @@ class migrate{
     function __construct(){
         $this->cloneIn( core::getInstance() );
 
-        if (!$this->input->has_command()) {
+        // Solo verificar comandos si estamos en CLI
+        if (php_sapi_name() === 'cli' && !$this->input->has_command()) {
             die("No hay parametros para procesar");
         }  
 
@@ -459,35 +460,38 @@ EXAMPLES:
     }
 }
 
-$migrate = new Migrate();
- 
-if( $migrate->commandValue("status") )
-{
-    $migrate->status();
-} 
+// Solo ejecutar comandos si estamos en CLI (línea de comandos)
+if (php_sapi_name() === 'cli') {
+    $migrate = new Migrate();
+     
+    if( $migrate->commandValue("status") )
+    {
+        $migrate->status();
+    } 
 
-if( $migrate->commandValue("make") )
-{
-    $migrate->make();
-} 
+    if( $migrate->commandValue("make") )
+    {
+        $migrate->make();
+    } 
 
-if( $migrate->commandValue("migrate") )
-{
-    $migrate->migrate();
-} 
+    if( $migrate->commandValue("migrate") )
+    {
+        $migrate->migrate();
+    } 
 
-if( $migrate->commandValue("rollback") )
-{
-    $migrate->rollback();
-} 
+    if( $migrate->commandValue("rollback") )
+    {
+        $migrate->rollback();
+    } 
 
-if( $migrate->commandValue("run") )
-{
-    $migrate->run();
-} 
+    if( $migrate->commandValue("run") )
+    {
+        $migrate->run();
+    } 
 
-if( $migrate->commandValue("help") )
-{
-    $migrate->help();
+    if( $migrate->commandValue("help") )
+    {
+        $migrate->help();
+    }
 }
 }

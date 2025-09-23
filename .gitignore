@@ -12,4 +12,4 @@
 /app/third_party/afip/config/afip/dev/dev.log
 
 /var/afip/dev/
-/var/log/
+/var/log/*.log

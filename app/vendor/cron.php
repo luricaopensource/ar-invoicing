@@ -23,7 +23,8 @@ class cron{
     function __construct(){
         $this->cloneIn( core::getInstance() );
 
-        if (!$this->input->has_command()) {
+        // Solo verificar comandos si estamos en CLI
+        if (php_sapi_name() === 'cli' && !$this->input->has_command()) {
             die("No hay parametros para procesar");
         } 
          
@@ -299,33 +300,36 @@ EXAMPLES:
 }
 
 
-$cron = new Cron();
+// Solo ejecutar comandos si estamos en CLI (línea de comandos)
+if (php_sapi_name() === 'cli') {
+    $cron = new Cron();
 
-if( $cron->commandValue("show") )
-{
-    if($cron->isCommandEqual("show","all")){
-        $cron->showJobs();
-    } else {
-        $cron->showJob( $cron->commandValue("show") );
+    if( $cron->commandValue("show") )
+    {
+        if($cron->isCommandEqual("show","all")){
+            $cron->showJobs();
+        } else {
+            $cron->showJob( $cron->commandValue("show") );
+        }
+    } 
+     
+    if( $cron->commandValue("create") )
+    {
+        $cron->createJob();
+    } 
+
+    if( $cron->commandValue("disable") )
+    {
+        $cron->disable();
+    } 
+
+    if( $cron->commandValue("edit") )
+    {
+        $cron->edit();
+    } 
+
+    if( $cron->commandValue("help") )
+    {
+        $cron->help();
     }
-} 
- 
-if( $cron->commandValue("create") )
-{
-    $cron->createJob();
-} 
-
-if( $cron->commandValue("disable") )
-{
-    $cron->disable();
-} 
-
-if( $cron->commandValue("edit") )
-{
-    $cron->edit();
-} 
-
-if( $cron->commandValue("help") )
-{
-    $cron->help();
 } 
