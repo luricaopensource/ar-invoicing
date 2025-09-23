@@ -153,14 +153,14 @@ class Afip extends AfipEnvironmentService {
             $this->logger->err(self::TAG, "El certificado no es válido");
             throw new Exception("El certificado no es válido");
         }
-        openssl_x509_free($certResource);
+        //openssl_x509_free($certResource);
         
         $keyResource = openssl_pkey_get_private($keyContent, $passphrase);
         if ($keyResource === false) {
             $this->logger->err(self::TAG, "La clave privada no es válida o la passphrase es incorrecta");
             throw new Exception("La clave privada no es válida o la passphrase es incorrecta");
         }
-        openssl_pkey_free($keyResource);
+        //openssl_pkey_free($keyResource);
         
         // Crear configuración temporal con los certificados proporcionados
         $tempConfig = $this->toArray();
