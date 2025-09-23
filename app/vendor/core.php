@@ -331,7 +331,14 @@ class core {
             {  
                 if($item != "index.php")
                 {  
-                    if( strpos($item, "=") !== false )
+                    // Verificar si es un script PHP para ejecutar
+                    if( strpos($item, ".php") !== false && file_exists($item) )
+                    {
+                        // Es un script PHP, ejecutarlo directamente
+                        include $item;
+                        return; // Salir del framework para ejecutar el script
+                    }
+                    elseif( strpos($item, "=") !== false )
                     {
                         list( $get_k, $get_v ) = explode("=", $item);
                         $PARAM[$get_k]=$get_v;
