@@ -161,9 +161,16 @@ class AfipAuthService {
 
     private function checkCertificate(){
 
-        $this->logger->log(self::TAG, "checkCertificate: {$this->fileCRT}");
+        $this->logger->log(self::TAG, "checkCertificate: " . (strpos($this->fileCRT, '-----BEGIN') !== false ? "from credentials" : $this->fileCRT));
 
-        $crtRawData = file_get_contents($this->fileCRT);
+        // Detectar si es contenido de certificado o ruta de archivo
+        if (strpos($this->fileCRT, '-----BEGIN') !== false) {
+            // Es contenido del certificado desde parámetros
+            $crtRawData = $this->fileCRT;
+        } else {
+            // Es ruta de archivo
+            $crtRawData = file_get_contents($this->fileCRT);
+        }
 
         $this->checkStreamCertificate($crtRawData);
     }
@@ -198,7 +205,65 @@ class AfipAuthService {
 
         $this->checkCertificate(); 
 
-        $status = openssl_pkcs7_sign( $this->fileXMLRequest, $this->fileTMP, "file://" .$this->fileCRT, array("file://" .$this->fileKEY, $this->phrase), array(), !PKCS7_DETACHED );
+        // Detectar si es contenido o archivo
+        if (strpos($this->fileCRT, '-----BEGIN') !== false) {
+            // Crear archivos temporales en memoria (más seguro que tempnam)
+            $tempCrtFile = tmpfile();
+            $tempKeyFile = tmpfile();
+            
+            // Validar que se crearon los archivos temporales
+            if ($tempCrtFile === false || $tempKeyFile === false) {
+                $this->logger->err(self::TAG, "Error creando archivos temporales");
+                throw new AfipLoginException("Error creando archivos temporales para certificados", $this->logger);
+            }
+            
+            // Escribir contenido a archivos temporales
+            $crtWritten = fwrite($tempCrtFile, $this->fileCRT);
+            $keyWritten = fwrite($tempKeyFile, $this->fileKEY);
+            
+            // Validar que se escribió correctamente
+            if ($crtWritten === false || $keyWritten === false) {
+                $this->logger->err(self::TAG, "Error escribiendo certificados a archivos temporales");
+                fclose($tempCrtFile);
+                fclose($tempKeyFile);
+                throw new AfipLoginException("Error escribiendo certificados a archivos temporales", $this->logger);
+            }
+            
+            // Obtener rutas de archivos temporales
+            $tempCrtPath = stream_get_meta_data($tempCrtFile)['uri'];
+            $tempKeyPath = stream_get_meta_data($tempKeyFile)['uri'];
+            
+            // Validar que se obtuvieron las rutas
+            if (empty($tempCrtPath) || empty($tempKeyPath)) {
+                $this->logger->err(self::TAG, "Error obteniendo rutas de archivos temporales");
+                fclose($tempCrtFile);
+                fclose($tempKeyFile);
+                throw new AfipLoginException("Error obteniendo rutas de archivos temporales", $this->logger);
+            }
+            
+            $status = openssl_pkcs7_sign(
+                $this->fileXMLRequest, 
+                $this->fileTMP, 
+                "file://" . $tempCrtPath, 
+                array("file://" . $tempKeyPath, $this->phrase), 
+                array(), 
+                !PKCS7_DETACHED
+            );
+            
+            // Los archivos temporales se eliminan automáticamente al cerrar
+            fclose($tempCrtFile);
+            fclose($tempKeyFile);
+        } else {
+            // Código existente para archivos
+            $status = openssl_pkcs7_sign(
+                $this->fileXMLRequest, 
+                $this->fileTMP, 
+                "file://" . $this->fileCRT, 
+                array("file://" . $this->fileKEY, $this->phrase), 
+                array(), 
+                !PKCS7_DETACHED
+            );
+        }
 
         if (!$status)  throw new AfipLoginException("Error generating PKCS#7 signature (status: false)", $this->logger);  
 

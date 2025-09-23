@@ -1,27 +1,38 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
-class ConsoleAttribute {
-    public const TEXT_GREEN = "\e[32m"; 
-    public const TEXT_YELLOW = "\e[33m"; 
-    public const TEXT_RED = "\e[31m"; 
-    public const TEXT_DEFAULT = "\e[39m"; 
+<?php 
+// Si no hay contexto core, cargarlo automáticamente
+if (!class_exists('core') || !core::getInstance()) {
+    require_once __DIR__ . "/core.php";
 }
 
-class ConsoleAlert{
-    public static function info(){
-        return ConsoleAttribute::TEXT_GREEN."[INFO]".ConsoleAttribute::TEXT_DEFAULT;
-    }
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-    public static function warn(){
-        return ConsoleAttribute::TEXT_YELLOW."[WARNING]".ConsoleAttribute::TEXT_DEFAULT;
-    }
-
-    public static function err(){
-        return ConsoleAttribute::TEXT_RED."[ERROR]".ConsoleAttribute::TEXT_DEFAULT;
+if (!class_exists('ConsoleAttribute')) {
+    class ConsoleAttribute {
+        public const TEXT_GREEN = "\e[32m"; 
+        public const TEXT_YELLOW = "\e[33m"; 
+        public const TEXT_RED = "\e[31m"; 
+        public const TEXT_DEFAULT = "\e[39m"; 
     }
 }
 
-class Migrate{
+if (!class_exists('ConsoleAlert')) {
+    class ConsoleAlert{
+        public static function info(){
+            return ConsoleAttribute::TEXT_GREEN."[INFO]".ConsoleAttribute::TEXT_DEFAULT;
+        }
+
+        public static function warn(){
+            return ConsoleAttribute::TEXT_YELLOW."[WARNING]".ConsoleAttribute::TEXT_DEFAULT;
+        }
+
+        public static function err(){
+            return ConsoleAttribute::TEXT_RED."[ERROR]".ConsoleAttribute::TEXT_DEFAULT;
+        }
+    }
+}
+
+if (!class_exists('migrate')) {
+class migrate{
     private $input;
     private $output;
     private $db; 
@@ -478,4 +489,5 @@ if( $migrate->commandValue("run") )
 if( $migrate->commandValue("help") )
 {
     $migrate->help();
+}
 }

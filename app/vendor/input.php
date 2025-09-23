@@ -247,12 +247,20 @@ class input
         if(isset($argv[0])) unset($argv[0]); 
 
         foreach($argv as $item){
-            preg_match('/--(\w+)=/', $item, $matches); 
+            // Buscar parámetros con valor: --parametro=valor
+            preg_match('/--(\w+)=(.+)/', $item, $matches); 
     
             if(isset($matches[1])){
                 $label = $matches[1];
-                $value = str_replace("--{$label}=","", $item);
+                $value = $matches[2];
                 $param[$label]=$value;
+            } else {
+                // Buscar parámetros sin valor: --parametro
+                preg_match('/--(\w+)/', $item, $matches);
+                if(isset($matches[1])){
+                    $label = $matches[1];
+                    $param[$label] = true;
+                }
             }
         }
 

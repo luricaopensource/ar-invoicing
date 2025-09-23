@@ -23,6 +23,14 @@ jobs:
             cd /home/ubuntu/proyecto
             git pull origin master
             
+            # Verificar y ejecutar migraciones pendientes
+            echo "Verificando migraciones pendientes..."
+            docker exec lurica-php sh -c "cd /var/www/html && php app/vendor/migrate.php --status=all"
+            
+            # Ejecutar migraciones pendientes si las hay
+            echo "Ejecutando migraciones pendientes..."
+            docker exec lurica-php sh -c "cd /var/www/html && php app/vendor/migrate.php --run=migration"
+            
             cd /home/ubuntu/proyecto/docker
             docker-compose down
             docker-compose up -d

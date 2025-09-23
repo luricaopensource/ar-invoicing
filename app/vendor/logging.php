@@ -39,7 +39,7 @@ function errorLogging($errno, $errstr, $errfile, $errline)
                         $handle->request);
 
     $logger = Logging::getInstance();
-    $logger->setEnvironment($_ENV['ENVIRONMENT']!='dev', BASEPATH.'/var/log');
+    $logger->setEnvironment('dev', BASEPATH.'var/log');
     $logger->setChannel("error");
     $logger->handleMessage($handle->level, 'CORE', $message);
 

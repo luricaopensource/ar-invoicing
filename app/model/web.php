@@ -2,9 +2,6 @@
  
 $App = core::getInstance();  
 
-require BASEPATH."app/third_party/afip/src/AFIP.php";
-
-use AFIP\Afip;
 use AFIP\Exceptions\AfipLoginException;
  
 $App->get('index', function ()
@@ -17,10 +14,15 @@ $App->get('afip.login', function ()
 {
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
-    $AFIP = new Afip();
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
 
     try{
-        $AFIP->service('wsfe')->login();
+        $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
     }catch (AfipLoginException $e){
         $data = new stdClass;
         $data->status = FALSE;
@@ -145,9 +147,15 @@ $App->get('tipo_doc.combo', function(){
 
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfe')->login();
-    $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposDoc();
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $tipoDoc = $this->afip->service('wsfe')->factory()->FEParamGetTiposDoc();
     $data = [];
 
     foreach($tipoDoc as $doc){
@@ -165,9 +173,15 @@ $App->get('pto_vta.combo', function(){
 
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfe')->login();
-    $tipo = $AFIP->service('wsfe')->factory()->FEParamGetPtosVenta(); 
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $tipo = $this->afip->service('wsfe')->factory()->FEParamGetPtosVenta(); 
     $data = [];
 
     foreach($tipo as $row){
@@ -197,9 +211,15 @@ $App->get('tipos_opcionales.combo', function(){
 
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfe')->login();
-    $tiposOpcionales = $AFIP->service('wsfe')->factory()->FEParamGetTiposOpcional();
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $tiposOpcionales = $this->afip->service('wsfe')->factory()->FEParamGetTiposOpcional();
     $data = [];
 
     foreach($tiposOpcionales as $tipo){
@@ -217,9 +237,15 @@ $App->get('tipo_concepto.combo', function(){
 
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfe')->login();
-    $tipoDoc = $AFIP->service('wsfe')->factory()->FEParamGetTiposConcepto();
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $tipoDoc = $this->afip->service('wsfe')->factory()->FEParamGetTiposConcepto();
     $data = [];
 
     foreach($tipoDoc as $doc){
@@ -239,9 +265,15 @@ $App->get('home.facturacion', function(){
     $post = $this->input->post();  
     $post->concepto = (int)$post->concepto; 
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfe')->login();
-    $last_voucher = $AFIP->service('wsfe')->factory()->FECompUltimoAutorizado(['PtoVta'=> $post->punto_venta, 'CbteTipo'=> $post->tipo]);
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $last_voucher = $this->afip->service('wsfe')->factory()->FECompUltimoAutorizado(['PtoVta'=> $post->punto_venta, 'CbteTipo'=> $post->tipo]);
 
     $voucher_number = $last_voucher->CbteNro + 1;
     $post->CbteDesde = $voucher_number;
@@ -385,9 +417,15 @@ $App->get('home.facturacion', function(){
 $App->get('debug.tipos_opcionales', function(){
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfe')->login();
-    $tiposOpcionales = $AFIP->service('wsfe')->factory()->FEParamGetTiposOpcional();
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $tiposOpcionales = $this->afip->service('wsfe')->factory()->FEParamGetTiposOpcional();
     
     die(json_encode($tiposOpcionales));
 });
@@ -399,10 +437,16 @@ $App->get('service.consultarComprobantes', function(){
     $post = $this->input->payload();  
     $data = json_decode( json_encode($post->payload), true );
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfecred')->login();
-    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
-    $result = $AFIP->service('wsfecred')->factory()->consultarComprobantes( $data, FALSE, TRUE );
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $this->afip->service('wsfecred')->factory()->consultarComprobantes( $data, FALSE, TRUE );
 
     header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
@@ -415,10 +459,16 @@ $App->get('service.consultarCtasCtes', function(){
     $post = $this->input->payload();  
     $data = json_decode( json_encode($post->payload), true );
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfecred')->login();
-    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
-    $result = $AFIP->service('wsfecred')->factory()->ConsultarCtasCtes( $data );
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $this->afip->service('wsfecred')->factory()->ConsultarCtasCtes( $data );
 
     header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
@@ -431,10 +481,16 @@ $App->get('service.consultarCtaCte', function(){
     $post = $this->input->payload();  
     $data = json_decode( json_encode($post->payload), true );
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfecred')->login();
-    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
-    $result = $AFIP->service('wsfecred')->factory()->consultarCtaCte( $data );
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $this->afip->service('wsfecred')->factory()->consultarCtaCte( $data );
 
     header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
@@ -447,10 +503,16 @@ $App->get('service.aceptarFECred', function(){
     $post = $this->input->payload();  
     $data = json_decode( json_encode($post->payload), true );
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfecred')->login();
-    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
-    $result = $AFIP->service('wsfecred')->factory()->aceptarFECred( $data );
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $this->afip->service('wsfecred')->factory()->aceptarFECred( $data );
 
     header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
@@ -463,10 +525,16 @@ $App->get('service.informarFacturaAgtDptoCltv', function(){
     $post = $this->input->payload();  
     $data = json_decode( json_encode($post->payload), true );
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfecred')->login();
-    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
-    $result = $AFIP->service('wsfecred')->factory()->informarFacturaAgtDptoCltv( $data );
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $this->afip->service('wsfecred')->factory()->informarFacturaAgtDptoCltv( $data );
 
     header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
@@ -479,10 +547,16 @@ $App->get('service.modificarOpcionTransferencia', function(){
     $post = $this->input->payload();  
     $data = json_decode( json_encode($post->payload), true );
 
-    $AFIP = new Afip(); 
-    $AFIP->service('wsfecred')->login();
-    $AFIP->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
-    $result = $AFIP->service('wsfecred')->factory()->modificarOpcionTransferencia( $data );
+    // Obtener certificados desde BD para el emisor específico
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+
+    if (!$emisor) {
+        throw new Exception("No se encontraron certificados para el emisor");
+    }
+
+    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
+    $result = $this->afip->service('wsfecred')->factory()->modificarOpcionTransferencia( $data );
 
     header('Content-Type: application/json; charset=utf-8');
     die(json_encode($result));
