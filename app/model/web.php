@@ -409,7 +409,7 @@ $App->get('home.facturacion', function(){
         unset($data['FeCAEReq']['FeDetReq']['FECAEDetRequest']['FchServHasta']);
     }
 
-    $result = $AFIP->service('wsfe')->factory()->FECAESolicitar($data);
+    $result = $this->afip->service('wsfe')->factory()->FECAESolicitar($data);
 
     die(json_encode($result));
 });
