@@ -184,7 +184,76 @@ $App->get('test.cache.soap', function(){
     die(json_encode($result, JSON_PRETTY_PRINT));
 });
 
-// Test 5: Limpiar cache SOAP manualmente
+// Test 5: Verificar fuente de certificados (BD vs archivos)
+$App->get('test.cert.source', function(){
+    $result = new stdClass;
+    $result->certificate_sources = [];
+    
+    // Verificar certificados en BD
+    try {
+        $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+        if ($emisor) {
+            $certData = openssl_x509_parse($emisor->afip_crt);
+            $result->certificate_sources[] = [
+                "source" => "database",
+                "subject" => $certData['subject']['CN'] ?? 'N/A',
+                "serial_number" => $certData['serialNumber'] ?? 'N/A',
+                "valid_from" => date('Y-m-d H:i:s', $certData['validFrom_time_t']),
+                "valid_to" => date('Y-m-d H:i:s', $certData['validTo_time_t']),
+                "is_valid_now" => (time() >= $certData['validFrom_time_t'] && time() <= $certData['validTo_time_t'])
+            ];
+        }
+    } catch (Exception $e) {
+        $result->certificate_sources[] = [
+            "source" => "database",
+            "error" => $e->getMessage()
+        ];
+    }
+    
+    // Verificar certificados en archivos
+    $certFiles = [
+        "33716282819-dev.crt" => BASEPATH . "var/afip/dev/33716282819-dev.crt",
+        "tmp/test.crt" => BASEPATH . "tmp/test.crt"
+    ];
+    
+    foreach($certFiles as $name => $path) {
+        if (file_exists($path)) {
+            try {
+                $certContent = file_get_contents($path);
+                $certData = openssl_x509_parse($certContent);
+                $result->certificate_sources[] = [
+                    "source" => "file",
+                    "file" => $name,
+                    "path" => $path,
+                    "subject" => $certData['subject']['CN'] ?? 'N/A',
+                    "serial_number" => $certData['serialNumber'] ?? 'N/A',
+                    "valid_from" => date('Y-m-d H:i:s', $certData['validFrom_time_t']),
+                    "valid_to" => date('Y-m-d H:i:s', $certData['validTo_time_t']),
+                    "is_valid_now" => (time() >= $certData['validFrom_time_t'] && time() <= $certData['validTo_time_t'])
+                ];
+            } catch (Exception $e) {
+                $result->certificate_sources[] = [
+                    "source" => "file",
+                    "file" => $name,
+                    "error" => $e->getMessage()
+                ];
+            }
+        }
+    }
+    
+    // Verificar configuración AFIP
+    $result->afip_config = [
+        "mode" => $this->afip->isProduction() ? "PRODUCTION" : "HOMOLOGACION",
+        "cuit" => $this->afip->getCUIT(),
+        "resource_folder" => $this->afip->getResourceFolder()
+    ];
+    
+    $result->timestamp = date('Y-m-d H:i:s');
+    
+    die(json_encode($result, JSON_PRETTY_PRINT));
+});
+
+// Test 6: Limpiar cache SOAP manualmente
 $App->get('test.cache.clean', function(){
     $result = new stdClass;
     $cacheDir = BASEPATH . "var/afip/dev/";
@@ -212,7 +281,7 @@ $App->get('test.cache.clean', function(){
         }
     }
     
-    // Limpiar archivos REQUEST/RESPONSE
+    // Limpiar archivos REQUEST (conservar RESPONSE con tokens válidos)
     $requestFiles = glob($cacheDir . "REQUEST-*");
     foreach($requestFiles as $file) {
         if (unlink($file)) {
@@ -222,17 +291,20 @@ $App->get('test.cache.clean', function(){
         }
     }
     
+    // Verificar archivos RESPONSE (no eliminar para conservar tokens válidos)
     $responseFiles = glob($cacheDir . "RESPONSE-*");
+    $result->response_files_preserved = [];
     foreach($responseFiles as $file) {
-        if (unlink($file)) {
-            $filesRemoved[] = basename($file);
-        } else {
-            $errors[] = "No se pudo eliminar: " . basename($file);
-        }
+        $result->response_files_preserved[] = [
+            "file" => basename($file),
+            "size" => filesize($file),
+            "modified" => date('Y-m-d H:i:s', filemtime($file)),
+            "age_hours" => round((time() - filemtime($file)) / 3600, 2)
+        ];
     }
     
     $result->status = "success";
-    $result->message = "Limpieza de cache completada";
+    $result->message = "Limpieza de cache completada (RESPONSE conservados para tokens válidos)";
     $result->files_removed = $filesRemoved;
     $result->files_removed_count = count($filesRemoved);
     $result->errors = $errors;

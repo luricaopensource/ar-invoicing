@@ -33,10 +33,10 @@ jobs:
             docker exec lurica-php sh -c "cd /var/www/html && rm -f var/afip/dev/tmp.wsdl.*"
             echo "Archivos temporales WSDL limpiados exitosamente"
             
-            # Limpiar archivos REQUEST y RESPONSE de AFIP
-            echo "Limpiando archivos REQUEST/RESPONSE de AFIP..."
-            docker exec lurica-php sh -c "cd /var/www/html && rm -f var/afip/dev/REQUEST-* var/afip/dev/RESPONSE-*"
-            echo "Archivos REQUEST/RESPONSE limpiados exitosamente"
+            # Limpiar archivos REQUEST de AFIP (conservar RESPONSE con tokens válidos)
+            echo "Limpiando archivos REQUEST de AFIP..."
+            docker exec lurica-php sh -c "cd /var/www/html && rm -f var/afip/dev/REQUEST-*"
+            echo "Archivos REQUEST limpiados exitosamente (RESPONSE conservados)"
             
             # Verificar y ejecutar migraciones pendientes
             echo "Verificando migraciones pendientes..."
