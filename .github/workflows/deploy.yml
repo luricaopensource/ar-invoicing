@@ -23,6 +23,16 @@ jobs:
             cd /home/ubuntu/proyecto
             git pull origin master
             
+            # Limpiar cache SOAP de AFIP
+            echo "Limpiando cache SOAP de AFIP..."
+            docker exec lurica-php sh -c "cd /var/www/html && rm -f var/afip/dev/wsdl--*"
+            echo "Cache SOAP limpiado exitosamente"
+            
+            # Limpiar archivos REQUEST y RESPONSE de AFIP
+            echo "Limpiando archivos REQUEST/RESPONSE de AFIP..."
+            docker exec lurica-php sh -c "cd /var/www/html && rm -f var/afip/dev/REQUEST-* var/afip/dev/RESPONSE-*"
+            echo "Archivos REQUEST/RESPONSE limpiados exitosamente"
+            
             # Verificar y ejecutar migraciones pendientes
             echo "Verificando migraciones pendientes..."
             docker exec lurica-php sh -c "cd /var/www/html && php app/vendor/migrate.php --status=all"
