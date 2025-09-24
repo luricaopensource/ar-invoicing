@@ -4,6 +4,7 @@ namespace AFIP;
 use AFIP\Services\AfipAuthService;
 use Exception;
 use stdClass;
+use ReflectionClass;
 
 spl_autoload_register(function ($class) {
 
@@ -130,9 +131,10 @@ class Afip extends AfipEnvironmentService {
      * @param string $certContent Certificate content as string
      * @param string $keyContent Private key content as string
      * @param string $passphrase Passphrase for private key (optional)
-     * @return TokenAuthorization
+     * @param string $tra TRA XML from database (optional)
+     * @return string TRA XML for external persistence
      */
-    public function loginWithCredentials(string $certContent, string $keyContent, string $passphrase = '') {
+    public function loginWithCredentials(string $certContent, string $keyContent, string $passphrase = '', $tra = null) {
         $this->logger->log(self::TAG, "loginWithCredentials");
         
         // Validar que los certificados no estén vacíos
@@ -168,11 +170,12 @@ class Afip extends AfipEnvironmentService {
         $tempConfig['PRIVATEKEY'] = $keyContent;
         $tempConfig['PASSPHRASE'] = $passphrase;
         
-        $auth = new AfipAuthService($tempConfig); 
+        $auth = new AfipAuthService($tempConfig, $tra); 
         $auth->setLogger($this->logger);
         $this->tokenAuthorization = $auth->authenticate($this->service, $this->stopOnError);
         
-        return $this->tokenAuthorization;
+        // Retornar TRA XML para persistencia externa
+        return $auth->getTraXml();
     }
 
     /**
@@ -193,5 +196,23 @@ class Afip extends AfipEnvironmentService {
         $this->bindInstancie->{$this->service} = new $property($this); 
         
         return $this->bindInstancie->{$this->service};
+    }
+
+    /**
+     * Validar TRA XML desde fuera de la librería
+     * @param string $traXml XML del TRA
+     * @return bool true si es válido, false si no
+     */
+    public function checkTicketResponseAccess($traXml) {
+        // Crear una instancia temporal de AfipAuthService para acceder al validador
+        $tempConfig = $this->toArray();
+        $tempAuth = new AfipAuthService($tempConfig);
+        
+        // Usar reflexión para acceder al método privado isTraValid
+        $reflection = new ReflectionClass($tempAuth);
+        $method = $reflection->getMethod('isTraValid');
+        $method->setAccessible(true);
+        
+        return $method->invoke($tempAuth, $traXml);
     }
 }

@@ -39,13 +39,15 @@ class AfipAuthService {
     private float $endTime = 0.0;
 
     private $logger;
+    private $afip_tra = null;
     
     const READ_FILE = 'r';
     const EXPIRE    =  60;
 
-    function __construct(array $option)
+    function __construct(array $option, $tra = null)
     {
         $this->config($option);
+        $this->afip_tra = $tra;
     }
 
     public function setLogger(AfipLogService $value){
@@ -137,7 +139,7 @@ class AfipAuthService {
     {
         $this->logger->log(self::TAG, "read {$this->fileXMLResponse}");
 
-        $TA = new SimpleXMLElement(file_get_contents($this->fileXMLResponse));
+        $TA = new SimpleXMLElement($this->afip_tra);
 
         $actual_time 		= new DateTime(date('c', date('U') + self::EXPIRE ));
         $expiration_time 	= new DateTime($TA->header->expirationTime);
@@ -343,10 +345,9 @@ class AfipAuthService {
 
 		$TA = $results->loginCmsReturn;
 
-		if (file_put_contents($this->fileXMLResponse, $TA)) 
-			return TRUE;
-		else
-			throw new AfipLoginException("Error writing XML: {$this->fileXMLResponse}", $this->logger);
+		// Retornar TRA XML para persistencia externa
+		$this->afip_tra = $TA;
+		return $TA;
     }
 
     /**
@@ -360,13 +361,13 @@ class AfipAuthService {
     {
         $this->logger->log(self::TAG, "authenticate {$service}"); 
 
-        if( file_exists($this->fileXMLResponse) ){
+        if( $this->afip_tra && $this->isTraValid($this->afip_tra) ){
             try {
-                return $this->read($continue);
+                return $this->parseTraFromString($this->afip_tra);
             }catch(AfipLoginException $ex){
-                $this->dropTmpFiles();
+                // TRA inválido, continuar con autenticación normal
             }
-        } 
+        }
       
         $this->create($service);
         $CMS = $this->sign();
@@ -374,5 +375,61 @@ class AfipAuthService {
         $this->connect($CMS);
         return $this->read($continue);
     
+    }
+
+    /**
+     * Validador completo de TRA
+     */
+    private function isTraValid($traXml) {
+        try {
+            // Validar que sea XML válido
+            $tra = new SimpleXMLElement($traXml);
+            
+            // Validar estructura mínima requerida
+            if (!isset($tra->header->expirationTime) || 
+                !isset($tra->credentials->token) || 
+                !isset($tra->credentials->sign) ||
+                !isset($tra->header->uniqueId)) {
+                return false;
+            }
+            
+            // Validar que los campos no estén vacíos
+            if (empty((string)$tra->header->expirationTime) || 
+                empty((string)$tra->credentials->token) || 
+                empty((string)$tra->credentials->sign)) {
+                return false;
+            }
+            
+            // Validar fecha de expiración
+            $expirationTime = (string)$tra->header->expirationTime;
+            $expirationTimestamp = strtotime($expirationTime);
+            
+            if ($expirationTimestamp === false) {
+                return false;
+            }
+            
+            return time() < $expirationTimestamp;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Parsear TRA desde string XML
+     */
+    private function parseTraFromString($traXml) {
+        $tra = new SimpleXMLElement($traXml);
+        return new TokenAuthorization(
+            (string)$tra->credentials->token,
+            (string)$tra->credentials->sign,
+            (string)$tra->header->expirationTime
+        );
+    }
+
+    /**
+     * Obtener TRA XML para persistencia externa
+     */
+    public function getTraXml() {
+        return $this->afip_tra;
     }
 }

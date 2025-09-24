@@ -9,7 +9,7 @@ $App->get('test.cert.bd', function ()
 {
     try {
         // Obtener certificados desde BD para el emisor específico
-        $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+        $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
         if (!$emisor) {
             throw new Exception("No se encontraron certificados para el emisor");
@@ -45,14 +45,14 @@ $App->get('test.afip.login', function ()
 {
     try {
         // Obtener certificados desde BD para el emisor específico
-        $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+        $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
         if (!$emisor) {
             throw new Exception("No se encontraron certificados para el emisor");
         }
 
         $startTime = microtime(true);
-        $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+        $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
         $endTime = microtime(true);
         
         $result = new stdClass;
@@ -82,7 +82,7 @@ $App->get('test.afip.login', function ()
 $App->get('test.afip.complete', function(){
     try {
         // Obtener certificados desde BD para el emisor específico
-        $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+        $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
         if (!$emisor) {
             throw new Exception("No se encontraron certificados para el emisor");
@@ -91,7 +91,7 @@ $App->get('test.afip.complete', function(){
         $startTime = microtime(true);
         
         // Login
-        $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+        $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
         $loginTime = microtime(true);
         
         // Obtener tipos de documento
@@ -191,7 +191,7 @@ $App->get('test.cert.source', function(){
     
     // Verificar certificados en BD
     try {
-        $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+        $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
         if ($emisor) {
             $certData = openssl_x509_parse($emisor->afip_crt);
             $result->certificate_sources[] = [
@@ -311,4 +311,63 @@ $App->get('test.cache.clean', function(){
     $result->timestamp = date('Y-m-d H:i:s');
     
     die(json_encode($result, JSON_PRETTY_PRINT));
+});
+
+// Test 7: Verificar TRA en base de datos
+$App->get('test.tra.db', function(){
+    $result = new stdClass;
+    
+    try {
+        $emisor = $this->db->query("SELECT afip_tra FROM emisores WHERE id = 1")->first();
+        
+        if ($emisor && $emisor->afip_tra) {
+            $tra = new SimpleXMLElement($emisor->afip_tra);
+            $result->status = "success";
+            $result->tra_info = [
+                "unique_id" => (string)$tra->header->uniqueId,
+                "generation_time" => (string)$tra->header->generationTime,
+                "expiration_time" => (string)$tra->header->expirationTime,
+                "is_valid" => time() < strtotime((string)$tra->header->expirationTime)
+            ];
+        } else {
+            $result->status = "info";
+            $result->message = "No hay TRA almacenado en base de datos";
+        }
+    } catch (Exception $e) {
+        $result->status = "error";
+        $result->message = $e->getMessage();
+    }
+    
+    die(json_encode($result, JSON_PRETTY_PRINT));
+});
+
+// Test 8: Probar login con TRA de BD
+$App->get('test.afip.login.tra', function(){
+    try {
+        $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
+        
+        if (!$emisor) {
+            throw new Exception("No se encontraron certificados para el emisor");
+        }
+        
+        $startTime = microtime(true);
+        $traStringXML = $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+        $endTime = microtime(true);
+        
+        $result = new stdClass;
+        $result->status = "success";
+        $result->message = "Login AFIP con TRA de BD exitoso";
+        $result->login_time = round(($endTime - $startTime) * 1000, 2) . " ms";
+        $result->tra_updated = ($traStringXML && $traStringXML !== $emisor->afip_tra);
+        $result->timestamp = date('Y-m-d H:i:s');
+        
+        die(json_encode($result, JSON_PRETTY_PRINT));
+        
+    } catch (Exception $e) {
+        $result = new stdClass;
+        $result->status = "error";
+        $result->message = $e->getMessage();
+        $result->timestamp = date('Y-m-d H:i:s');
+        die(json_encode($result, JSON_PRETTY_PRINT));
+    }
 });

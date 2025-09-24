@@ -15,14 +15,40 @@ $App->get('afip.login', function ()
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
     try{
-        $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+        $traStringXML = $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+        if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+            // Validar TRA usando la librería AFIP
+            if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+                try {
+                    // Escape del XML para prevenir SQL injection
+                    $escapedXml = $this->db->escape($traStringXML);
+                    
+                    // Actualizar en base de datos
+                    $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                    
+                    if (!$result) {
+                        throw new Exception("Error al guardar TRA en base de datos");
+                    }
+                    
+                    // Log exitoso (opcional)
+                    error_log("TRA actualizado exitosamente en BD");
+                    
+                } catch (Exception $e) {
+                    // Log error pero no fallar la operación principal
+                    error_log("Error guardando TRA en BD: " . $e->getMessage());
+                }
+            } else {
+                error_log("TRA XML inválido, no se guardó en BD");
+            }
+        }
     }catch (AfipLoginException $e){
         $data = new stdClass;
         $data->status = FALSE;
@@ -148,13 +174,39 @@ $App->get('tipo_doc.combo', function(){
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $tipoDoc = $this->afip->service('wsfe')->factory()->FEParamGetTiposDoc();
     $data = [];
 
@@ -174,13 +226,39 @@ $App->get('pto_vta.combo', function(){
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $tipo = $this->afip->service('wsfe')->factory()->FEParamGetPtosVenta(); 
     $data = [];
 
@@ -212,13 +290,39 @@ $App->get('tipos_opcionales.combo', function(){
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $tiposOpcionales = $this->afip->service('wsfe')->factory()->FEParamGetTiposOpcional();
     $data = [];
 
@@ -238,13 +342,39 @@ $App->get('tipo_concepto.combo', function(){
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $tipoDoc = $this->afip->service('wsfe')->factory()->FEParamGetTiposConcepto();
     $data = [];
 
@@ -266,13 +396,39 @@ $App->get('home.facturacion', function(){
     $post->concepto = (int)$post->concepto; 
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $last_voucher = $this->afip->service('wsfe')->factory()->FECompUltimoAutorizado(['PtoVta'=> $post->punto_venta, 'CbteTipo'=> $post->tipo]);
 
     $voucher_number = $last_voucher->CbteNro + 1;
@@ -418,13 +574,39 @@ $App->get('debug.tipos_opcionales', function(){
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) die('{"status": false,"message":"Termino el tiempo de session"}');
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfe')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $tiposOpcionales = $this->afip->service('wsfe')->factory()->FEParamGetTiposOpcional();
     
     die(json_encode($tiposOpcionales));
@@ -438,13 +620,39 @@ $App->get('service.consultarComprobantes', function(){
     $data = json_decode( json_encode($post->payload), true );
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $this->afip->service('wsfecred')->factory()->consultarComprobantes( $data, FALSE, TRUE );
 
@@ -460,13 +668,39 @@ $App->get('service.consultarCtasCtes', function(){
     $data = json_decode( json_encode($post->payload), true );
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $this->afip->service('wsfecred')->factory()->ConsultarCtasCtes( $data );
 
@@ -482,13 +716,39 @@ $App->get('service.consultarCtaCte', function(){
     $data = json_decode( json_encode($post->payload), true );
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $this->afip->service('wsfecred')->factory()->consultarCtaCte( $data );
 
@@ -504,13 +764,39 @@ $App->get('service.aceptarFECred', function(){
     $data = json_decode( json_encode($post->payload), true );
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $this->afip->service('wsfecred')->factory()->aceptarFECred( $data );
 
@@ -526,13 +812,39 @@ $App->get('service.informarFacturaAgtDptoCltv', function(){
     $data = json_decode( json_encode($post->payload), true );
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $this->afip->service('wsfecred')->factory()->informarFacturaAgtDptoCltv( $data );
 
@@ -548,13 +860,39 @@ $App->get('service.modificarOpcionTransferencia', function(){
     $data = json_decode( json_encode($post->payload), true );
 
     // Obtener certificados desde BD para el emisor específico
-    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
     if (!$emisor) {
         throw new Exception("No se encontraron certificados para el emisor");
     }
 
-    $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase);
+    $traStringXML = $this->afip->service('wsfecred')->loginWithCredentials($emisor->afip_crt, $emisor->afip_key, $emisor->afip_passphrase, $emisor->afip_tra);
+
+    if ($traStringXML && $traStringXML !== $emisor->afip_tra) {
+        // Validar TRA usando la librería AFIP
+        if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+            try {
+                // Escape del XML para prevenir SQL injection
+                $escapedXml = $this->db->escape($traStringXML);
+                
+                // Actualizar en base de datos
+                $result = $this->db->query("UPDATE emisores SET afip_tra = '{$escapedXml}' WHERE id = 1");
+                
+                if (!$result) {
+                    throw new Exception("Error al guardar TRA en base de datos");
+                }
+                
+                // Log exitoso (opcional)
+                error_log("TRA actualizado exitosamente en BD");
+                
+            } catch (Exception $e) {
+                // Log error pero no fallar la operación principal
+                error_log("Error guardando TRA en BD: " . $e->getMessage());
+            }
+        } else {
+            error_log("TRA XML inválido, no se guardó en BD");
+        }
+    }
     $this->afip->service('wsfecred')->factory()->setCuitRepresented( $post->cuit );
     $result = $this->afip->service('wsfecred')->factory()->modificarOpcionTransferencia( $data );
 
