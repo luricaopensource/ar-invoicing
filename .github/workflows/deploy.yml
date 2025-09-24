@@ -28,6 +28,11 @@ jobs:
             docker exec lurica-php sh -c "cd /var/www/html && rm -f var/afip/dev/wsdl--*"
             echo "Cache SOAP limpiado exitosamente"
             
+            # Limpiar archivos temporales de WSDL
+            echo "Limpiando archivos temporales de WSDL..."
+            docker exec lurica-php sh -c "cd /var/www/html && rm -f var/afip/dev/tmp.wsdl.*"
+            echo "Archivos temporales WSDL limpiados exitosamente"
+            
             # Limpiar archivos REQUEST y RESPONSE de AFIP
             echo "Limpiando archivos REQUEST/RESPONSE de AFIP..."
             docker exec lurica-php sh -c "cd /var/www/html && rm -f var/afip/dev/REQUEST-* var/afip/dev/RESPONSE-*"
