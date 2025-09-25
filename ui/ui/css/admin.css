@@ -430,8 +430,12 @@
 
 .webix_sidebar_expanded .webix_tree_branch_1
 {
-    padding: 3.2px 16px ;
+    padding: 0 ;
     user-select: none;
+}
+
+.webix_sidebar.webix_sidebar_left .webix_tree_item.webix_sidebar_selected + .webix_tree_leaves .webix_tree_item, .webix_sidebar.webix_sidebar_left .webix_tree_item.webix_selected, .webix_sidebar.webix_sidebar_left .webix_tree_item.webix_sidebar_selected {
+    box-shadow: inset 0 0 #1CA1C1;
 }
 
 .webix_sidebar_expanded .webix_tree_item

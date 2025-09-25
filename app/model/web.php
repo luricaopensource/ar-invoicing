@@ -365,5 +365,86 @@ $App->get('home.facturacion', function(){
 
     $result = $this->afip->service('wsfe')->factory()->FECAESolicitar($data);
 
+    // 1- Controlar que venga el campo CAE
+    // 2- Si es cae insertar en comprobantes_emitidos 
+    if (isset($result->FeDetResp->FECAEDetResponse->CAE) && 
+        isset($result->FeDetResp->FECAEDetResponse->Resultado) && 
+        $result->FeDetResp->FECAEDetResponse->Resultado == 'A') {
+        
+        $detResponse = $result->FeDetResp->FECAEDetResponse;
+        $cabResponse = $result->FeCabResp;
+        
+        // Convertir fechas al formato correcto
+        $fechaProceso = DateTime::createFromFormat('YmdHis', $cabResponse->FchProceso);
+        $fechaCbte = DateTime::createFromFormat('Ymd', $detResponse->CbteFch);
+        $fechaCae = DateTime::createFromFormat('Ymd', $detResponse->CAEFchVto);
+        
+        $insertData = [
+            'nro_cbte' => $detResponse->CbteHasta,
+            'pto_vta' => $cabResponse->PtoVta,
+            'tipo_cbte' => $cabResponse->CbteTipo,
+            'cuit_emisor' => $cabResponse->Cuit,
+            'cuit_receptor' => $detResponse->DocNro,
+            'resultado' => $detResponse->Resultado,
+            'concepto' => $detResponse->Concepto,
+            'fecha_proceso' => $fechaProceso ? $fechaProceso->format('Y-m-d H:i:s') : $cabResponse->FchProceso,
+            'fecha_cbte' => $fechaCbte ? $fechaCbte->format('Y-m-d') : $detResponse->CbteFch,
+            'fecha_cae' => $fechaCae ? $fechaCae->format('Y-m-d') : $detResponse->CAEFchVto,
+            'doc_tipo' => $detResponse->DocTipo,
+            'cae' => $detResponse->CAE,
+            'imp_total' => number_format($post->total, 2, ".", ""),
+            'imp_neto' => number_format($post->importe_neto, 2, ".", ""),
+            'imp_iva' => number_format($post->iva, 2, ".", ""),
+            'moneda' => $post->moneda,
+            'id_user' => $sessionId,
+            'id_emisor' => $emisorId
+        ];
+        
+        $this->db->query("INSERT INTO comprobantes_emitidos 
+            (nro_cbte, pto_vta, tipo_cbte, cuit_emisor, cuit_receptor, resultado, concepto, 
+             fecha_proceso, fecha_cbte, fecha_cae, doc_tipo, cae, imp_total, imp_neto, imp_iva, 
+             moneda, id_user, id_emisor) VALUES 
+            ('{$insertData['nro_cbte']}', '{$insertData['pto_vta']}', '{$insertData['tipo_cbte']}', 
+             '{$insertData['cuit_emisor']}', '{$insertData['cuit_receptor']}', '{$insertData['resultado']}', 
+             '{$insertData['concepto']}', '{$insertData['fecha_proceso']}', '{$insertData['fecha_cbte']}', 
+             '{$insertData['fecha_cae']}', '{$insertData['doc_tipo']}', '{$insertData['cae']}', 
+             '{$insertData['imp_total']}', '{$insertData['imp_neto']}', '{$insertData['imp_iva']}', 
+             '{$insertData['moneda']}', '{$insertData['id_user']}', '{$insertData['id_emisor']}')");
+    }
+
     $this->output->json($result);
+});
+
+$App->get('comprobantes.list', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    $comprobantes = $this->db->query("
+        SELECT 
+            ce.id,
+            ce.nro_cbte,
+            ce.pto_vta,
+            ce.tipo_cbte,
+            ce.cuit_emisor,
+            ce.cuit_receptor,
+            ce.resultado,
+            ce.concepto,
+            ce.fecha_proceso,
+            ce.fecha_cbte,
+            ce.fecha_cae,
+            ce.doc_tipo,
+            ce.cae,
+            ce.imp_total,
+            ce.imp_neto,
+            ce.imp_iva,
+            ce.moneda,
+            ce.created_at,
+            CONCAT(e.nombre, ' (', e.afip_cuit, ')') as emisor_nombre
+        FROM comprobantes_emitidos ce
+        INNER JOIN emisores e ON e.id = ce.id_emisor
+        WHERE ce.id_user = '{$sessionId}'
+        ORDER BY ce.created_at DESC
+    ")->result();
+
+    $this->output->json($comprobantes);
 });
