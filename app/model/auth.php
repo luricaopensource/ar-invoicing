@@ -10,11 +10,11 @@ $App = core::getInstance();
 #request-login#
 $App->get('auth-login', function () {
 
-    if( !$this->input->has_post() ) die('{"status":false, "message":"URL invalida"}');
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
 
     $post = $this->input->post();
 
-    if(!$post->user || !$post->pass) die('{"status":false, "message":"Debe completar los campos"}');
+    if(!$post->user || !$post->pass) $this->output->json(['status' => false, 'message' => 'Debe completar los campos']);
 
     $user = $this->db->query(" SELECT * FROM  usuarios WHERE  user = '{$post->user}' AND  pass = MD5('{$post->pass}')   LIMIT 1 ")->first();
 
@@ -22,10 +22,10 @@ $App->get('auth-login', function () {
         $tipo = $this->db->query(" SELECT * FROM usuarios_tipo WHERE id = '{$user->tipo}' ")->first();
 
         $this->session->send( $user->id );
-        die('{"status":true, "message":"Welcome","dashboard":"'.$tipo->dashboard.'","dashcenter":"'.$tipo->dashcenter.'"}');
+        $this->output->json(['status' => true, 'message' => 'Welcome', 'dashboard' => $tipo->dashboard, 'dashcenter' => $tipo->dashcenter]);
     }
     else {
-        die('{"status":false, "message":"Usuario y/o password invalido"}');
+        $this->output->json(['status' => false, 'message' => 'Usuario y/o password invalido']);
     }
 
   
@@ -42,7 +42,7 @@ $App->get('auth-logout', function ($rid="")
 {
     $this->session->close();
 
-    die('{"status":false}');
+    $this->output->json(['status' => false]);
 });
 #/request-logout#
 
@@ -53,42 +53,42 @@ $App->get('auth-logout', function ($rid="")
 #request-online#
 $App->get("auth-online", function ($rid="")
 {
-    $id  = (int)$this->session->recv(); if($id <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+    $id  = (int)$this->session->recv(); if($id <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
 
     $user = $this->db->query(" SELECT * FROM usuarios WHERE id = '{$id}' ")->first();
 
     $tipo = $this->db->query(" SELECT * FROM usuarios_tipo WHERE id = '{$user->tipo}' ")->first();
 
-    if($user) die('{"status": true,"message":"Welcome","dashboard":"'.$tipo->dashboard.'","dashcenter":"'.$tipo->dashcenter.'"}');
+    if($user) $this->output->json(['status' => true, 'message' => 'Welcome', 'dashboard' => $tipo->dashboard, 'dashcenter' => $tipo->dashcenter]);
     
-    die('{"status": false,"message":"Logoff"}');
+    $this->output->json(['status' => false, 'message' => 'Logoff']);
       
 });
  
 $App->get("request-account", function ()
 {
-    $id  = (int)$this->session->recv(); if($id <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+    $id  = (int)$this->session->recv(); if($id <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
 
     $user = $this->db->query("SELECT addr, apellido, mail, nombre, tel, user FROM usuarios WHERE id = '{$id}'")->first();
 
     if($user==FALSE)
     {
-        die('{"result":false, "message":"No hay datos devueltos"}'); 
+        $this->output->json(['result' => false, 'message' => 'No hay datos devueltos']); 
     }
     else
     {
         $user->result = true;
         $user->message= "Datos devueltos";
 
-        die(json_encode($user));
+        $this->output->json($user);
     }
 });
 
 $App->get("update-account", function ()
 { 
-    $id  = (int)$this->session->recv(); if($id <1) die('{"status": false,"message":"Termino el tiempo de session"}');
+    $id  = (int)$this->session->recv(); if($id <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
 
-    if( !$this->input->has_post() ) die('{"status":false, "message":"URL invalida"}');
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
 
     $post = $this->input->post();
 
@@ -98,5 +98,71 @@ $App->get("update-account", function ()
     
     $this->db->query(UPDATE("usuarios", $post , $id));
 
-    die('{"result":true, "message":"Actualizado exitosamente"}'); 
+    $this->output->json(['result' => true, 'message' => 'Actualizado exitosamente']); 
+});
+
+
+// ------------------------------------------------------------------------------------------------
+
+
+$App->get('account.list', function(){
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    $data = $this->db->query("SELECT * FROM usuarios")->result();
+
+    $this->output->json($data);
+});
+
+$App->get('account.row', function($id=0){
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    $id = (int)$id; if($id <1) $this->output->json(['status' => false, 'message' => 'Invalid user id']); 
+
+    $user = $this->db->query("SELECT id, nombre, apellido, mail, user, '' as 'pass', tel, tipo, activo FROM usuarios WHERE id = '{$id}'")->first();
+
+    $this->output->json($user);
+});
+
+$App->get('account.update', function(){
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    $post = $this->input->post();
+
+    if(!property_exists($post,'id')) {
+        $this->db->query("
+            INSERT 
+                usuarios 
+            SET 
+                nombre  = '{$post->nombre}',
+                apellido= '{$post->apellido}',
+                mail    = '{$post->mail}',
+                user    = '{$post->user}',
+                tel     = '{$post->tel}',
+                tipo    = '{$post->tipo}',
+                activo  = '{$post->activo}',
+                pass    = md5('{$post->pass}')
+        ");
+        $this->output->json(['status' => true, 'message' => 'Insercion exitosa']);
+    }
+
+    $post->id= (int)$post->id; if($post->id <1) $this->output->json(['status' => false, 'message' => 'Invalid user id']);
+    $passw = ""; if($post->pass) $passw = ", pass = md5('{$post->pass}')";
+
+    $this->db->query("
+        UPDATE 
+            usuarios 
+        SET 
+            nombre  = '{$post->nombre}',
+            apellido= '{$post->apellido}',
+            mail    = '{$post->mail}',
+            user    = '{$post->user}',
+            tel     = '{$post->tel}',
+            tipo    = '{$post->tipo}',
+            activo  = '{$post->activo}'
+            {$passw}
+        WHERE 
+            id = '{$post->id}'
+    ")->first();
+
+    $this->output->json(['status' => true, 'message' => 'Actualizacion exitosa']);
 });

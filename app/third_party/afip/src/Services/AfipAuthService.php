@@ -2,12 +2,13 @@
 
 namespace AFIP\Services;
  
-use SimpleXMLElement;
 use DateTime; 
+use Exception;
 use SoapFault;
-use AFIP\Exceptions\AfipLoginException;
-use AFIP\Entities\TokenAuthorization;
+use SimpleXMLElement;
 use AFIP\Services\AfipSoapService;
+use AFIP\Entities\TokenAuthorization;
+use AFIP\Exceptions\AfipLoginException;
 
 /**
  * Afip Authorization Service
@@ -410,6 +411,7 @@ class AfipAuthService {
             
             return time() < $expirationTimestamp;
         } catch (Exception $e) {
+            $this->logger->err(self::TAG,"Error al validar TRA: " . $e->getMessage());
             return false;
         }
     }

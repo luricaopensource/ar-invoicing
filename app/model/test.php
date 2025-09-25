@@ -12,7 +12,7 @@ $App->get('test.cert.bd', function ()
         $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
         if (!$emisor) {
-            throw new Exception("No se encontraron certificados para el emisor");
+            $this->output->json(['status' => false, 'message' => 'No se encontraron certificados para el emisor']);
         }
 
         // Decodificar certificado para verificar fechas
@@ -30,13 +30,13 @@ $App->get('test.cert.bd', function ()
             "days_until_expiry" => round(($certData['validTo_time_t'] - time()) / 86400)
         ];
 
-        die(json_encode($result, JSON_PRETTY_PRINT));
+        $this->output->json($result);
         
     } catch (Exception $e) {
         $result = new stdClass;
         $result->status = "error";
         $result->message = $e->getMessage();
-        die(json_encode($result, JSON_PRETTY_PRINT));
+        $this->output->json($result);
     }
 });
 
@@ -48,7 +48,7 @@ $App->get('test.afip.login', function ()
         $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
         if (!$emisor) {
-            throw new Exception("No se encontraron certificados para el emisor");
+            $this->output->json(['status' => false, 'message' => 'No se encontraron certificados para el emisor']);
         }
 
         $startTime = microtime(true);
@@ -61,20 +61,20 @@ $App->get('test.afip.login', function ()
         $result->login_time = round(($endTime - $startTime) * 1000, 2) . " ms";
         $result->timestamp = date('Y-m-d H:i:s');
 
-        die(json_encode($result, JSON_PRETTY_PRINT));
+        $this->output->json($result);
         
     } catch (AfipLoginException $e) {
         $result = new stdClass;
         $result->status = "error";
         $result->message = "Error de login AFIP: " . $e->getMessage();
         $result->timestamp = date('Y-m-d H:i:s');
-        die(json_encode($result, JSON_PRETTY_PRINT));
+        $this->output->json($result);
     } catch (Exception $e) {
         $result = new stdClass;
         $result->status = "error";
         $result->message = "Error general: " . $e->getMessage();
         $result->timestamp = date('Y-m-d H:i:s');
-        die(json_encode($result, JSON_PRETTY_PRINT));
+        $this->output->json($result);
     }
 });
 
@@ -85,7 +85,7 @@ $App->get('test.afip.complete', function(){
         $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
 
         if (!$emisor) {
-            throw new Exception("No se encontraron certificados para el emisor");
+            $this->output->json(['status' => false, 'message' => 'No se encontraron certificados para el emisor']);
         }
 
         $startTime = microtime(true);
@@ -108,20 +108,20 @@ $App->get('test.afip.complete', function(){
         $result->tipos_documento_count = count($tiposDoc);
         $result->timestamp = date('Y-m-d H:i:s');
 
-        die(json_encode($result, JSON_PRETTY_PRINT));
+        $this->output->json($result);
         
     } catch (AfipLoginException $e) {
         $result = new stdClass;
         $result->status = "error";
         $result->message = "Error de login AFIP: " . $e->getMessage();
         $result->timestamp = date('Y-m-d H:i:s');
-        die(json_encode($result, JSON_PRETTY_PRINT));
+        $this->output->json($result);
     } catch (Exception $e) {
         $result = new stdClass;
         $result->status = "error";
         $result->message = "Error general: " . $e->getMessage();
         $result->timestamp = date('Y-m-d H:i:s');
-        die(json_encode($result, JSON_PRETTY_PRINT));
+        $this->output->json($result);
     }
 });
 
@@ -181,7 +181,7 @@ $App->get('test.cache.soap', function(){
         }
     }
 
-    die(json_encode($result, JSON_PRETTY_PRINT));
+    $this->output->json($result);
 });
 
 // Test 5: Verificar fuente de certificados (BD vs archivos)
@@ -250,7 +250,7 @@ $App->get('test.cert.source', function(){
     
     $result->timestamp = date('Y-m-d H:i:s');
     
-    die(json_encode($result, JSON_PRETTY_PRINT));
+    $this->output->json($result);
 });
 
 // Test 6: Limpiar cache SOAP manualmente
@@ -310,7 +310,7 @@ $App->get('test.cache.clean', function(){
     $result->errors = $errors;
     $result->timestamp = date('Y-m-d H:i:s');
     
-    die(json_encode($result, JSON_PRETTY_PRINT));
+    $this->output->json($result);
 });
 
 // Test 7: Verificar TRA en base de datos
@@ -338,7 +338,7 @@ $App->get('test.tra.db', function(){
         $result->message = $e->getMessage();
     }
     
-    die(json_encode($result, JSON_PRETTY_PRINT));
+    $this->output->json($result);
 });
 
 // Test 8: Probar login con TRA de BD
@@ -347,7 +347,7 @@ $App->get('test.afip.login.tra', function(){
         $emisor = $this->db->query("SELECT afip_crt, afip_key, afip_passphrase, afip_tra FROM emisores WHERE id = 1")->first();
         
         if (!$emisor) {
-            throw new Exception("No se encontraron certificados para el emisor");
+            $this->output->json(['status' => false, 'message' => 'No se encontraron certificados para el emisor']);
         }
         
         $startTime = microtime(true);
@@ -361,13 +361,21 @@ $App->get('test.afip.login.tra', function(){
         $result->tra_updated = ($traStringXML && $traStringXML !== $emisor->afip_tra);
         $result->timestamp = date('Y-m-d H:i:s');
         
-        die(json_encode($result, JSON_PRETTY_PRINT));
+        $this->output->json($result);
         
     } catch (Exception $e) {
         $result = new stdClass;
         $result->status = "error";
         $result->message = $e->getMessage();
         $result->timestamp = date('Y-m-d H:i:s');
-        die(json_encode($result, JSON_PRETTY_PRINT));
+        $this->output->json($result);
     }
+});
+
+$App->get('test.afip.tipos_opcionales', function(){
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    $result = $this->afip_session->login(1); if(!$result) $this->output->json(['status' => false, 'message' => 'Error al iniciar sesión afip']);
+
+    $tiposOpcionales = $this->afip->service('wsfe')->factory()->FEParamGetTiposOpcional();
+    $this->output->json($tiposOpcionales);
 });

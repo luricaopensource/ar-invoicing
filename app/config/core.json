@@ -12,8 +12,10 @@
         {"module":"migrate"         ,"library":{ "class":"migrate", "rename":"migrate"      }, "file":"app\/vendor\/migrate"                },
         {"module":"cron"            ,"library":{ "class":"cron", "rename":"cron"            }, "file":"app\/vendor\/cron"                   },
         {"module":"Afip"            ,"library":{ "class":"AFIP\\Afip", "rename":"afip"      }, "file":"app\/third_party\/afip\/src\/AFIP"   },
-        {"file":"app\/model\/auth"  , "helper":true },
+        {"module":"afip_session"    ,"library":{ "class":"afip_session", "rename":"afip_session"      }, "file":"app\/library\/afip_session"   },
+        {"file":"app\/model\/auth"  , "helper":true }, 
 		{"file":"app\/model\/web"   , "helper":true },
+        {"file":"app\/model\/wsfecred"  , "helper":true },
 		{"file":"app\/model\/test"  , "helper":true } 
 	],
     "debug"          : true     ,

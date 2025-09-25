@@ -258,6 +258,11 @@ class core {
         } 
     }
 
+    public function module($module)
+    {
+        return $this->{$module};
+    }
+
 
     /**
      * Main app exec
