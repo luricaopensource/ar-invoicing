@@ -448,3 +448,87 @@ $App->get('comprobantes.list', function(){
 
     $this->output->json($comprobantes);
 });
+
+$App->get('comprobantes.afip.list', function($param = null){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    $emisorId = $this->afip_session->getEmisorBySessionAndService($sessionId, 'wsfecred');
+    if (!$emisorId) $this->output->json(['status' => false, 'message' => 'No se encontró emisor para wsfecred']);
+    
+    $result = $this->afip_session->login($emisorId); 
+    if(!$result) $this->output->json(['status' => false, 'message' => 'Error al iniciar sesión afip']);
+
+    // Obtener datos del emisor
+    $emisor = $this->db->query("SELECT afip_cuit FROM emisores WHERE id = '{$emisorId}'")->first();
+    if (!$emisor) $this->output->json(['status' => false, 'message' => 'No se encontró CUIT del emisor']);
+
+    // Configurar datos para consulta (últimos 30 días)
+    $fechaDesde = date('Ymd', strtotime('-30 days'));
+    $fechaHasta = date('Ymd');
+    
+    $data = [
+        'FechaDesde' => $fechaDesde,
+        'FechaHasta' => $fechaHasta,
+        'CbteTipo' => 201, // Factura de crédito
+        'PtoVta' => 1,
+        'rolCUITRepresentada' => 'Emisor'
+    ];
+
+    // Configurar el CUIT representado
+    $this->afip->service('wsfecred')->factory()->setCuitRepresented($emisor->afip_cuit);
+    
+    // Log para debug
+    error_log("Consultando comprobantes AFIP para CUIT: " . $emisor->afip_cuit);
+    error_log("Datos de consulta: " . json_encode($data));
+    
+    try {
+        // Hacer la consulta
+        $result = $this->afip->service('wsfecred')->factory()->consultarComprobantes($data, FALSE, TRUE);
+
+        // Formatear la respuesta para la vista
+        $comprobantes = [];
+        
+        if (isset($result->ResultGet) && isset($result->ResultGet->CbteAsoc)) {
+            $cbteAsoc = $result->ResultGet->CbteAsoc;
+            
+            // Si es un solo comprobante, convertir a array
+            if (!is_array($cbteAsoc)) {
+                $cbteAsoc = [$cbteAsoc];
+            }
+            
+            foreach ($cbteAsoc as $comprobante) {
+                $comprobantes[] = [
+                    'tipo_cbte' => $comprobante->Tipo,
+                    'pto_vta' => $comprobante->PtoVta,
+                    'nro_cbte' => $comprobante->Nro,
+                    'cuit_emisor' => $comprobante->Cuit,
+                    'fecha_cbte' => $comprobante->CbteFch,
+                    'imp_total' => $comprobante->ImpTotal,
+                    'imp_neto' => $comprobante->ImpNeto,
+                    'imp_iva' => $comprobante->ImpIVA,
+                    'moneda' => $comprobante->MonId,
+                    'cae' => $comprobante->CAE,
+                    'fecha_cae' => $comprobante->CAEFchVto,
+                    'resultado' => $comprobante->Resultado ?? 'A'
+                ];
+            }
+        }
+
+        $this->output->json($comprobantes);
+        
+    } catch (Exception $e) {
+        // En caso de error de conectividad con AFIP, devolver error simplificado
+        error_log("Error conectando a AFIP: " . $e->getMessage());
+        
+        // Simplificar el mensaje de error
+        $errorMessage = 'Error de conectividad con AFIP';
+        if (strpos($e->getMessage(), 'Could not connect to host') !== false) {
+            $errorMessage = 'No se pudo conectar con los servidores de AFIP';
+        } elseif (strpos($e->getMessage(), 'SOAP Fault') !== false) {
+            $errorMessage = 'Error en el servicio de AFIP';
+        }
+        
+        $this->output->json(['status' => false, 'message' => $errorMessage]);
+    }
+});

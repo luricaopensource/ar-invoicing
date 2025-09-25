@@ -21,7 +21,8 @@
             "data" :
             [  
                 { "id": "app.dashcenter" , "value":"EMISION DE FACTURAS" },
-                { "id": "app.abm.comprobantes_view" , "value":"COMPROBANTES EMITIDOS" }
+                { "id": "app.abm.comprobantes_view" , "value":"COMPROBANTES EMITIDOS" },
+                { "id": "app.abm.comprobantes_afip_view" , "value":"COMPROBANTES AFIP" }
             ] 
         }
     ]
