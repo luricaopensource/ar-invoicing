@@ -36,7 +36,17 @@ $App->get('home.stats', function(){
 
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
 
-    $emisor = $this->db->query("SELECT afip_cuit FROM emisores WHERE id = 1")->first();
+    $emisor = $this->db->query("
+                SELECT 
+                    e.id
+                FROM 
+                    usuarios u 
+                INNER JOIN usuarios_emisores eu ON (eu.id_user = u.id)  
+                INNER JOIN emisores e ON (e.id = eu.id_emisor)  
+                WHERE u.id = '{$sessionId}' and e.afip_service = 'wsfe' 
+                LIMIT 1
+            ")->first();
+
     $user = $this->db->query("SELECT * FROM usuarios WHERE id = '{$sessionId}'")->first();
 
     $user->tel =  $user->tel == "" ? "305000100842" : $user->tel ;
@@ -48,7 +58,7 @@ $App->get('home.stats', function(){
     $factura->concepto          = 2;
     $factura->tipo_doc          = "80";
     $factura->receptor          = $user->tel;
-    $factura->emisor            = $emisor ? $emisor->afip_cuit : "33716282819";
+    $factura->emisor            = $emisor ? $emisor->id : "0";
     $factura->tipo_agente       = "ADC";
     $factura->importe_neto      = "1000";
     $factura->fecha_vto         = date("Y-m-d", strtotime("+3 months"));
@@ -183,6 +193,24 @@ $App->get('tipo_concepto.combo', function(){
     $this->output->json($data);
 });
 
+$App->get('emisores.combo', function(){
+
+    $sessionId  = (int)$this->session->recv(); if($sessionId <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $rs = $this->db->query("
+                SELECT 
+                    e.id, CONCAT(e.nombre, ' (', e.afip_cuit, ')') as value 
+                FROM 
+                    usuarios u 
+                INNER JOIN usuarios_emisores eu ON (eu.id_user = u.id)  
+                INNER JOIN emisores e ON (e.id = eu.id_emisor)  
+                WHERE u.id = '{$sessionId}' and e.afip_service = 'wsfe'
+            ");
+ 
+    $this->output->json($rs->result());
+});
+
+
 $App->get('home.facturacion', function(){
 
     $sessionId  = (int)$this->session->recv(); if($sessionId <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
@@ -201,6 +229,9 @@ $App->get('home.facturacion', function(){
     $voucher_number = $last_voucher->CbteNro + 1;
     $post->CbteDesde = $voucher_number;
     $post->CbteHasta = $voucher_number;
+
+    $post->emisor_cuit = $this->db->query("SELECT afip_cuit FROM emisores WHERE id = '{$post->emisor}'")->first();
+
 
     $opcionales = [];
     $iva = [];
@@ -262,7 +293,7 @@ $App->get('home.facturacion', function(){
                     'Tipo' 		=> (int)$post->tipo_asoc, 
                     'PtoVta' 	=> (int)$post->pto_vta_cbte_asoc, 
                     'Nro' 	    => (int)$post->cbte_asoc, 
-                    'Cuit' 	    => $post->emisor, 
+                    'Cuit' 	    => $post->emisor_cuit, 
                     'CbteFch' 	=> (int)$fecha_afip
                 ]
             ];

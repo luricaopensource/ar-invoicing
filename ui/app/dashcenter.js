@@ -113,9 +113,9 @@ app.define("app.dashcenter", function()
                                 { 
                                     name    : "emisor", 
                                     label   : "Emisor", 
-                                    view    : "text",
-                                    readonly:true,
-                                    width   : 250
+                                    view    : "combo",
+                                    options : __.req({action:"emisores.combo"}),
+                                    width   : 300
                                 },
                                 {
                                     name    : "tipo_agente",  
