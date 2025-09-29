@@ -143,6 +143,11 @@ class AfipRequestService {
 		catch(SoapFault $e){
 			$exception = $e;
 			$this->logger->warn(self::TAG, "{$operation} Exception: ".$e->getMessage());
+			$this->logger->warn(self::TAG, "Last Request: ".$this->soap_client->__getLastRequest());
+			$this->logger->warn(self::TAG, "Last Response: ".$this->soap_client->__getLastResponse());
+			$this->logger->warn(self::TAG, "Last Request Headers: ".$this->soap_client->__getLastRequestHeaders());
+			$this->logger->warn(self::TAG, "Last Response Headers: ".$this->soap_client->__getLastResponseHeaders());
+	
 		}
 		finally{
 			if(!is_null($exception))
@@ -178,6 +183,12 @@ class AfipRequestService {
     private function checkErrors(string $operation, $results)
 	{
 		if (is_soap_fault($results)) { 
+
+			$this->logger->warn(self::TAG, "Last Request: ".$this->soap_client->__getLastRequest());
+			$this->logger->warn(self::TAG, "Last Response: ".$this->soap_client->__getLastResponse());
+			$this->logger->warn(self::TAG, "Last Request Headers: ".$this->soap_client->__getLastRequestHeaders());
+			$this->logger->warn(self::TAG, "Last Response Headers: ".$this->soap_client->__getLastResponseHeaders());
+	
 			throw new AfipServiceException("{$operation} SOAP Fault: \n".print_r($results, true), $this->logger);
 		}
 	}

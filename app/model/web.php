@@ -464,60 +464,106 @@ $App->get('comprobantes.afip.list', function($param = null){
     if (!$emisor) $this->output->json(['status' => false, 'message' => 'No se encontró CUIT del emisor']);
 
     // Configurar datos para consulta (últimos 30 días)
-    $fechaDesde = date('Ymd', strtotime('-30 days'));
-    $fechaHasta = date('Ymd');
+    $fechaDesde = date('Y-m-d', strtotime('-30 days'));
+    $fechaHasta = date('Y-m-d');
     
-    $data = [
+   /*
         'FechaDesde' => $fechaDesde,
         'FechaHasta' => $fechaHasta,
         'CbteTipo' => 201, // Factura de crédito
         'PtoVta' => 1,
-        'rolCUITRepresentada' => 'Emisor'
+   */ 
+    $data = [
+        'rolCUITRepresentada' => 'Emisor',
+        'fecha' => [
+            'tipo'  => 'Emision',
+            'desde' => $fechaDesde,
+            'hasta' => $fechaHasta
+        ]
     ];
 
     // Configurar el CUIT representado
     $this->afip->service('wsfecred')->factory()->setCuitRepresented($emisor->afip_cuit);
-    
-    // Log para debug
-    error_log("Consultando comprobantes AFIP para CUIT: " . $emisor->afip_cuit);
-    error_log("Datos de consulta: " . json_encode($data));
+
     
     try {
+        // Obtener el cliente SOAP para acceder a la respuesta raw
+        $soapClient = $this->afip->service('wsfecred')->factory()->getSoapClient();
+        
         // Hacer la consulta
         $result = $this->afip->service('wsfecred')->factory()->consultarComprobantes($data, FALSE, TRUE);
+
 
         // Formatear la respuesta para la vista
         $comprobantes = [];
         
-        if (isset($result->ResultGet) && isset($result->ResultGet->CbteAsoc)) {
-            $cbteAsoc = $result->ResultGet->CbteAsoc;
+        if (isset($result->consultarCmpReturn) && isset($result->consultarCmpReturn->arrayComprobantes)) {
+            $arrayComprobantes = $result->consultarCmpReturn->arrayComprobantes;
             
-            // Si es un solo comprobante, convertir a array
-            if (!is_array($cbteAsoc)) {
-                $cbteAsoc = [$cbteAsoc];
-            }
-            
-            foreach ($cbteAsoc as $comprobante) {
-                $comprobantes[] = [
-                    'tipo_cbte' => $comprobante->Tipo,
-                    'pto_vta' => $comprobante->PtoVta,
-                    'nro_cbte' => $comprobante->Nro,
-                    'cuit_emisor' => $comprobante->Cuit,
-                    'fecha_cbte' => $comprobante->CbteFch,
-                    'imp_total' => $comprobante->ImpTotal,
-                    'imp_neto' => $comprobante->ImpNeto,
-                    'imp_iva' => $comprobante->ImpIVA,
-                    'moneda' => $comprobante->MonId,
-                    'cae' => $comprobante->CAE,
-                    'fecha_cae' => $comprobante->CAEFchVto,
-                    'resultado' => $comprobante->Resultado ?? 'A'
-                ];
+            // Verificar si hay comprobantes
+            if (isset($arrayComprobantes->comprobante)) {
+                $comprobantesArray = $arrayComprobantes->comprobante;
+                
+                // Si es un solo comprobante, convertir a array
+                if (!is_array($comprobantesArray)) {
+                    $comprobantesArray = [$comprobantesArray];
+                }
+                
+                foreach ($comprobantesArray as $comprobante) {
+                    // Extraer importe neto e IVA de los subtotales
+                    $impNeto = 0;
+                    $impIva = 0;
+                    
+                    if (isset($comprobante->arraySubtotalesIVA) && isset($comprobante->arraySubtotalesIVA->subtotalIVA)) {
+                        $subtotalIva = $comprobante->arraySubtotalesIVA->subtotalIVA;
+                        if (!is_array($subtotalIva)) {
+                            $subtotalIva = [$subtotalIva];
+                        }
+                        
+                        foreach ($subtotalIva as $iva) {
+                            $impNeto += $iva->baseImponible;
+                            $impIva += $iva->importe;
+                        }
+                    }
+                    
+                    $comprobantes[] = [
+                        'tipo_cbte' => $comprobante->codTipoCmp,
+                        'pto_vta' => $comprobante->ptovta,
+                        'nro_cbte' => $comprobante->nroCmp,
+                        'cuit_emisor' => $comprobante->cuitEmisor,
+                        'cuit_receptor' => $comprobante->cuitReceptor,
+                        'razon_social_emisor' => $comprobante->razonSocialEmi,
+                        'razon_social_receptor' => $comprobante->razonSocialRecep,
+                        'fecha_cbte' => $comprobante->fechaEmision,
+                        'fecha_puesta_dispo' => $comprobante->fechaPuestaDispo,
+                        'fecha_ven_pago' => $comprobante->fechaVenPago,
+                        'fecha_ven_acep' => $comprobante->fechaVenAcep,
+                        'imp_total' => $comprobante->importeTotal,
+                        'imp_neto' => $impNeto,
+                        'imp_iva' => $impIva,
+                        'moneda' => $comprobante->codMoneda,
+                        'cotizacion_moneda' => $comprobante->cotizacionMoneda,
+                        'cod_autorizacion' => $comprobante->codAutorizacion,
+                        'tipo_cod_auto' => $comprobante->tipoCodAuto,
+                        'estado' => $comprobante->estado->estado,
+                        'fecha_hora_estado' => $comprobante->estado->fechaHoraEstado,
+                        'tipo_acep' => $comprobante->tipoAcep ?? null,
+                        'fecha_hora_acep' => $comprobante->fechaHoraAcep ?? null,
+                        'opcion_transferencia' => $comprobante->opcionTransferencia,
+                        'cod_cta_cte' => $comprobante->codCtaCte,
+                        'cbu_emisor' => $comprobante->CBUEmisor ?? null,
+                        'alias_emisor' => $comprobante->AliasEmisor ?? null
+                    ];
+                }
             }
         }
 
         $this->output->json($comprobantes);
         
     } catch (Exception $e) {
+        // En caso de error, capturar la respuesta raw del cliente SOAP
+
+        
         // En caso de error de conectividad con AFIP, devolver error simplificado
         error_log("Error conectando a AFIP: " . $e->getMessage());
         
@@ -527,6 +573,8 @@ $App->get('comprobantes.afip.list', function($param = null){
             $errorMessage = 'No se pudo conectar con los servidores de AFIP';
         } elseif (strpos($e->getMessage(), 'SOAP Fault') !== false) {
             $errorMessage = 'Error en el servicio de AFIP';
+        } elseif (strpos($e->getMessage(), 'looks like we got no XML document') !== false) {
+            $errorMessage = 'AFIP devolvió una respuesta vacía o inválida';
         }
         
         $this->output->json(['status' => false, 'message' => $errorMessage]);

@@ -5,9 +5,9 @@ $App = core::getInstance();
 use AFIP\Exceptions\AfipLoginException;
 
 
-$App->get('wsfecred.consultarComprobantes', function(){
+$App->get('wsfecred.consultarComprobantes', function($sessionId){
 
-    $sessionId  = (int)$this->session->recv(); if($sessionId <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    //$sessionId  = (int)$this->session->recv(); if($sessionId <1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
     $emisorId = $this->afip_session->getEmisorBySessionAndService($sessionId, 'wsfecred');
     if (!$emisorId) $this->output->json(['status' => false, 'message' => 'No se encontró emisor para wsfecred']);
     
