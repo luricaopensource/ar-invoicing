@@ -18,19 +18,36 @@ app.define("app.dashboard",function()
                 [
                     {
                         id          : "_sidebar",
-                        view        : "sidebar", 
-                        data        : usr.menu , 
+                        view        : "sidebar",  
                         borderless  : true,
                         on          :
                         {
                             onItemClick: function(id)
-                            { 
-                                if( __.isNumber(id)) return;
-
+                            {  
                                 $$("content").disable();
 
-                                app.require( this.getItem(id).id );
-                            } 
+                                console.log(this.getItem(id));
+
+                                app.require( this.getItem(id).vista );
+                            },
+                            onAfterRender: webix.once(function(){ 
+                                                            
+                                var _session = __.get_user();
+ 
+  
+                                if(_session == false)
+                                {
+                                    webix.message({type:"error", text:"Session not found"});
+                                    return;
+                                }
+
+                                // Llamar a "sidebar-list" y completar el data de _sidebar
+                                __.GET({"action": "sidebar-list"}, function(data) {
+                                    $$("_sidebar").clearAll();
+                                    $$("_sidebar").parse(data);
+                                });
+
+                            }) 
                         }
                     },
                     {   id :"content"  }
@@ -39,46 +56,6 @@ app.define("app.dashboard",function()
         ]
     }); 
 
-    /*
-    webix.ui
-    ({
-        view      : "popup",
-        id        : "my_pop",
-        css       : "toolbar-popup",
-        head      : "Submenu",
-        width     : 170,
-        borderless: true,
-        margin    : 0,
-        padding   : 0,
-        body      :
-        {
-            view      : "list", 
-            borderless: true,
-            margin    : 0,
-            padding   : 0,
-            type      : { height:48  },
-            template  : "<span class='webix_icon fa fa-#icon#'></span> #name#", 
-            select    : true,
-            autoheight: true,
-            data      :
-            [
-                { id: "app.settings.main" , name:"Settings" , icon: "cog"      }, 
-                { id: "sys.widget.logout" , name:"Logout"   , icon: "power-off"} 
-            ],
-            on        :
-            {
-                onItemClick: function(id)
-                { 
-                    if( __.isNumber(id)) return; 
-
-                    $$("my_pop").hide();
-
-                    app.require( this.getItem(id).id );
-                } 
-            }            
-        }
-    });
-    */
 
     waves.clear();
 

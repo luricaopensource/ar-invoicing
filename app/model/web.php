@@ -580,3 +580,156 @@ $App->get('comprobantes.afip.list', function($param = null){
         $this->output->json(['status' => false, 'message' => $errorMessage]);
     }
 });
+
+// Endpoints para gestión de menús
+$App->get('menu-list', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $menus = $this->db->query("
+        SELECT 
+            m.id,
+            m.id_tipo,
+            m.vista,
+            m.value,
+            m.icon,
+            m.orden,
+            ut.nombre as tipo
+        FROM menu m
+        INNER JOIN usuarios_tipo ut ON m.id_tipo = ut.id
+        ORDER BY m.id_tipo, m.orden ASC
+    ")->result();
+    
+    $this->output->json($menus);
+});
+
+$App->get('menu-row', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid menu id']);
+    
+    $menu = $this->db->query("SELECT * FROM menu WHERE id = '{$id}'")->first();
+    $this->output->json($menu);
+});
+
+$App->get('menu-add', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
+
+    $post = $this->input->post();
+
+    if(!$post->id_tipo || !$post->vista || !$post->value || !$post->icon || !$post->orden) {
+        $this->output->json(['status' => false, 'message' => 'Debe completar todos los campos']);
+    }
+
+    $tipoExists = $this->db->query("SELECT id FROM usuarios_tipo WHERE id = '{$post->id_tipo}'")->first();
+    if(!$tipoExists) {
+        $this->output->json(['status' => false, 'message' => 'Tipo de usuario no existe']);
+    }
+
+    $this->db->query("
+        INSERT INTO menu 
+        SET 
+            id_tipo = '{$post->id_tipo}',
+            vista   = '{$post->vista}',
+            value   = '{$post->value}',
+            icon    = '{$post->icon}',
+            orden   = '{$post->orden}'
+    ");
+
+    $this->output->json(['status' => true, 'message' => 'Menu creado exitosamente']);
+});
+
+$App->get('menu-update', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
+
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid menu id']);
+
+    $post = $this->input->post();
+
+    $menuExists = $this->db->query("SELECT id FROM menu WHERE id = '{$id}'")->first();
+    if(!$menuExists) {
+        $this->output->json(['status' => false, 'message' => 'Menu no existe']);
+    }
+
+    if($post->id_tipo) {
+        $tipoExists = $this->db->query("SELECT id FROM usuarios_tipo WHERE id = '{$post->id_tipo}'")->first();
+        if(!$tipoExists) {
+            $this->output->json(['status' => false, 'message' => 'Tipo de usuario no existe']);
+        }
+    }
+
+    $this->db->query("
+        UPDATE menu 
+        SET 
+            id_tipo = '{$post->id_tipo}',
+            vista   = '{$post->vista}',
+            value   = '{$post->value}',
+            icon    = '{$post->icon}',
+            orden   = '{$post->orden}'
+        WHERE 
+            id = '{$id}'
+    ");
+
+    $this->output->json(['status' => true, 'message' => 'Menu actualizado exitosamente']);
+});
+
+$App->get('menu-rem', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid menu id']);
+    
+    $menuExists = $this->db->query("SELECT id FROM menu WHERE id = '{$id}'")->first();
+    if(!$menuExists) {
+        $this->output->json(['status' => false, 'message' => 'Menu no existe']);
+    }
+
+    $this->db->query("DELETE FROM menu WHERE id = '{$id}'");
+    
+    $this->output->json(['status' => true, 'message' => 'Menu eliminado exitosamente']);
+});
+
+$App->get('usuarios_tipo.combo', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    $tipos = $this->db->query("
+        SELECT 
+            id, 
+            nombre as value 
+        FROM usuarios_tipo 
+        ORDER BY nombre ASC
+    ")->result();
+
+    $this->output->json($tipos);
+});
+
+$App->get('sidebar-list', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    $user = $this->db->query("SELECT tipo FROM usuarios WHERE id = '{$sessionId}'")->first();
+    
+    $menus = $this->db->query("
+        SELECT 
+            id, 
+            vista, 
+            value,
+            CONCAT('fa fa-', icon) as icon
+        FROM menu 
+        WHERE id_tipo = '{$user->tipo}' 
+        ORDER BY orden ASC
+    ")->result();
+
+    $this->output->json($menus);
+});

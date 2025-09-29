@@ -19,10 +19,31 @@ $App->get('auth-login', function () {
     $user = $this->db->query(" SELECT * FROM  usuarios WHERE  user = '{$post->user}' AND  pass = MD5('{$post->pass}')   LIMIT 1 ")->first();
 
     if($user){
-        $tipo = $this->db->query(" SELECT * FROM usuarios_tipo WHERE id = '{$user->tipo}' ")->first();
+        $usuario_tipo = $this->db->query("
+            SELECT 
+                UT.dashboard, 
+                UT.dashcenter,
+                UT.id 
+            FROM 
+                usuarios U 
+            INNER JOIN usuarios_tipo UT ON (U.tipo = UT.id)
+            WHERE 
+                U.id = {$user->id}
+        ")->first();
 
         $this->session->send( $user->id );
-        $this->output->json(['status' => true, 'message' => 'Welcome', 'dashboard' => $tipo->dashboard, 'dashcenter' => $tipo->dashcenter]);
+        
+        $output = new stdclass;
+        $output->status = true;
+        $output->id = $user->id; 
+
+        if($usuario_tipo != FALSE) {
+            $output->dashboard = $usuario_tipo->dashboard;
+            $output->dashcenter = $usuario_tipo->dashcenter;
+            $output->tipo = $usuario_tipo->id;
+        }
+
+        $this->output->json($output);
     }
     else {
         $this->output->json(['status' => false, 'message' => 'Usuario y/o password invalido']);
@@ -57,9 +78,31 @@ $App->get("auth-online", function ($rid="")
 
     $user = $this->db->query(" SELECT * FROM usuarios WHERE id = '{$id}' ")->first();
 
-    $tipo = $this->db->query(" SELECT * FROM usuarios_tipo WHERE id = '{$user->tipo}' ")->first();
+    if($user) {
+        $usuario_tipo = $this->db->query("
+            SELECT 
+                UT.dashboard, 
+                UT.dashcenter,
+                UT.id 
+            FROM 
+                usuarios U 
+            INNER JOIN usuarios_tipo UT ON (U.tipo = UT.id)
+            WHERE 
+                U.id = {$user->id}
+        ")->first();
 
-    if($user) $this->output->json(['status' => true, 'message' => 'Welcome', 'dashboard' => $tipo->dashboard, 'dashcenter' => $tipo->dashcenter]);
+        $output = new stdclass;
+        $output->status = true;
+        $output->id = $user->id; 
+
+        if($usuario_tipo != FALSE) {
+            $output->dashboard = $usuario_tipo->dashboard;
+            $output->dashcenter = $usuario_tipo->dashcenter;
+            $output->tipo = $usuario_tipo->id;
+        }
+
+        $this->output->json($output);
+    }
     
     $this->output->json(['status' => false, 'message' => 'Logoff']);
       
