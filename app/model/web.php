@@ -733,3 +733,347 @@ $App->get('sidebar-list', function(){
 
     $this->output->json($menus);
 });
+
+// Endpoints para gestión de emisores
+$App->get('emisores-list', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $emisores = $this->db->query("
+        SELECT 
+            id,
+            nombre,
+            afip_cuit,
+            afip_service,
+            afip_tra,
+            afip_crt,
+            afip_key,
+            afip_passphrase
+        FROM emisores 
+        ORDER BY nombre ASC
+    ")->result();
+    
+    $this->output->json($emisores);
+});
+
+$App->get('emisores-row', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid emisor id']);
+    
+    $emisor = $this->db->query("SELECT * FROM emisores WHERE id = '{$id}'")->first();
+    $this->output->json($emisor);
+});
+
+$App->get('emisores-add', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
+
+    $post = $this->input->post();
+
+    if(!$post->nombre || !$post->afip_cuit || !$post->afip_service) {
+        $this->output->json(['status' => false, 'message' => 'Debe completar los campos obligatorios']);
+    }
+
+    $this->db->query("
+        INSERT INTO emisores 
+        SET 
+            nombre = '{$post->nombre}',
+            afip_cuit = '{$post->afip_cuit}',
+            afip_service = '{$post->afip_service}',
+            afip_tra = '{$post->afip_tra}',
+            afip_crt = '{$post->afip_crt}',
+            afip_key = '{$post->afip_key}',
+            afip_passphrase = '{$post->afip_passphrase}'
+    ");
+
+    $this->output->json(['status' => true, 'message' => 'Emisor creado exitosamente']);
+});
+
+$App->get('emisores-update', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
+
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid emisor id']);
+
+    $post = $this->input->post();
+
+    $emisorExists = $this->db->query("SELECT id FROM emisores WHERE id = '{$id}'")->first();
+    if(!$emisorExists) {
+        $this->output->json(['status' => false, 'message' => 'Emisor no existe']);
+    }
+
+    $this->db->query("
+        UPDATE emisores 
+        SET 
+            nombre = '{$post->nombre}',
+            afip_cuit = '{$post->afip_cuit}',
+            afip_service = '{$post->afip_service}',
+            afip_tra = '{$post->afip_tra}',
+            afip_crt = '{$post->afip_crt}',
+            afip_key = '{$post->afip_key}',
+            afip_passphrase = '{$post->afip_passphrase}'
+        WHERE 
+            id = '{$id}'
+    ");
+
+    $this->output->json(['status' => true, 'message' => 'Emisor actualizado exitosamente']);
+});
+
+$App->get('emisores-rem', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid emisor id']);
+    
+    $emisorExists = $this->db->query("SELECT id FROM emisores WHERE id = '{$id}'")->first();
+    if(!$emisorExists) {
+        $this->output->json(['status' => false, 'message' => 'Emisor no existe']);
+    }
+
+    $this->db->query("DELETE FROM emisores WHERE id = '{$id}'");
+    
+    $this->output->json(['status' => true, 'message' => 'Emisor eliminado exitosamente']);
+});
+
+// Endpoints para gestión de usuarios
+$App->get('usuarios-list', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $usuarios = $this->db->query("
+        SELECT 
+            u.id,
+            u.nombre,
+            u.apellido,
+            u.user,
+            u.mail,
+            u.tel,
+            u.activo,
+            ut.nombre as tipo_nombre
+        FROM usuarios u
+        INNER JOIN usuarios_tipo ut ON u.tipo = ut.id
+        ORDER BY u.nombre ASC
+    ")->result();
+    
+    $this->output->json($usuarios);
+});
+
+$App->get('usuarios-row', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid usuario id']);
+    
+    $usuario = $this->db->query("SELECT * FROM usuarios WHERE id = '{$id}'")->first();
+    $this->output->json($usuario);
+});
+
+$App->get('usuarios-add', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
+
+    $post = $this->input->post();
+
+    if(!$post->nombre || !$post->apellido || !$post->user || !$post->pass || !$post->tipo) {
+        $this->output->json(['status' => false, 'message' => 'Debe completar los campos obligatorios']);
+    }
+
+    $tipoExists = $this->db->query("SELECT id FROM usuarios_tipo WHERE id = '{$post->tipo}'")->first();
+    if(!$tipoExists) {
+        $this->output->json(['status' => false, 'message' => 'Tipo de usuario no existe']);
+    }
+
+    $this->db->query("
+        INSERT INTO usuarios 
+        SET 
+            tipo = '{$post->tipo}',
+            nombre = '{$post->nombre}',
+            apellido = '{$post->apellido}',
+            user = '{$post->user}',
+            pass = MD5('{$post->pass}'),
+            mail = '{$post->mail}',
+            tel = '{$post->tel}',
+            activo = '{$post->activo}'
+    ");
+
+    $this->output->json(['status' => true, 'message' => 'Usuario creado exitosamente']);
+});
+
+$App->get('usuarios-update', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
+
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid usuario id']);
+
+    $post = $this->input->post();
+
+    $usuarioExists = $this->db->query("SELECT id FROM usuarios WHERE id = '{$id}'")->first();
+    if(!$usuarioExists) {
+        $this->output->json(['status' => false, 'message' => 'Usuario no existe']);
+    }
+
+    if($post->tipo) {
+        $tipoExists = $this->db->query("SELECT id FROM usuarios_tipo WHERE id = '{$post->tipo}'")->first();
+        if(!$tipoExists) {
+            $this->output->json(['status' => false, 'message' => 'Tipo de usuario no existe']);
+        }
+    }
+
+    $passUpdate = $post->pass ? "pass = MD5('{$post->pass}')," : "";
+
+    $this->db->query("
+        UPDATE usuarios 
+        SET 
+            tipo = '{$post->tipo}',
+            nombre = '{$post->nombre}',
+            apellido = '{$post->apellido}',
+            user = '{$post->user}',
+            {$passUpdate}
+            mail = '{$post->mail}',
+            tel = '{$post->tel}',
+            activo = '{$post->activo}'
+        WHERE 
+            id = '{$id}'
+    ");
+
+    $this->output->json(['status' => true, 'message' => 'Usuario actualizado exitosamente']);
+});
+
+$App->get('usuarios-rem', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid usuario id']);
+    
+    $usuarioExists = $this->db->query("SELECT id FROM usuarios WHERE id = '{$id}'")->first();
+    if(!$usuarioExists) {
+        $this->output->json(['status' => false, 'message' => 'Usuario no existe']);
+    }
+
+    $this->db->query("DELETE FROM usuarios WHERE id = '{$id}'");
+    
+    $this->output->json(['status' => true, 'message' => 'Usuario eliminado exitosamente']);
+});
+
+// Endpoints para gestión de tipos de usuario
+$App->get('usuarios_tipo-list', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $tipos = $this->db->query("
+        SELECT 
+            id,
+            nombre,
+            color,
+            dashboard,
+            dashcenter
+        FROM usuarios_tipo 
+        ORDER BY nombre ASC
+    ")->result();
+    
+    $this->output->json($tipos);
+});
+
+$App->get('usuarios_tipo-row', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid tipo id']);
+    
+    $tipo = $this->db->query("SELECT * FROM usuarios_tipo WHERE id = '{$id}'")->first();
+    $this->output->json($tipo);
+});
+
+$App->get('usuarios_tipo-add', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
+
+    $post = $this->input->post();
+
+    if(!$post->nombre || !$post->color || !$post->dashboard || !$post->dashcenter) {
+        $this->output->json(['status' => false, 'message' => 'Debe completar todos los campos']);
+    }
+
+    $this->db->query("
+        INSERT INTO usuarios_tipo 
+        SET 
+            nombre = '{$post->nombre}',
+            color = '{$post->color}',
+            dashboard = '{$post->dashboard}',
+            dashcenter = '{$post->dashcenter}'
+    ");
+
+    $this->output->json(['status' => true, 'message' => 'Tipo de usuario creado exitosamente']);
+});
+
+$App->get('usuarios_tipo-update', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
+
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid tipo id']);
+
+    $post = $this->input->post();
+
+    $tipoExists = $this->db->query("SELECT id FROM usuarios_tipo WHERE id = '{$id}'")->first();
+    if(!$tipoExists) {
+        $this->output->json(['status' => false, 'message' => 'Tipo de usuario no existe']);
+    }
+
+    $this->db->query("
+        UPDATE usuarios_tipo 
+        SET 
+            nombre = '{$post->nombre}',
+            color = '{$post->color}',
+            dashboard = '{$post->dashboard}',
+            dashcenter = '{$post->dashcenter}'
+        WHERE 
+            id = '{$id}'
+    ");
+
+    $this->output->json(['status' => true, 'message' => 'Tipo de usuario actualizado exitosamente']);
+});
+
+$App->get('usuarios_tipo-rem', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid tipo id']);
+    
+    $tipoExists = $this->db->query("SELECT id FROM usuarios_tipo WHERE id = '{$id}'")->first();
+    if(!$tipoExists) {
+        $this->output->json(['status' => false, 'message' => 'Tipo de usuario no existe']);
+    }
+
+    // Verificar si hay usuarios usando este tipo
+    $usuariosCount = $this->db->query("SELECT COUNT(*) as count FROM usuarios WHERE tipo = '{$id}'")->first();
+    if($usuariosCount->count > 0) {
+        $this->output->json(['status' => false, 'message' => 'No se puede eliminar: hay usuarios usando este tipo']);
+    }
+
+    $this->db->query("DELETE FROM usuarios_tipo WHERE id = '{$id}'");
+    
+    $this->output->json(['status' => true, 'message' => 'Tipo de usuario eliminado exitosamente']);
+});
