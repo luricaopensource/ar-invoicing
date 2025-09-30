@@ -13,3 +13,5 @@
 
 /var/afip/dev/
 /var/log/*.log
+/var/migration/last.log
+/var/log/error-prod.log
