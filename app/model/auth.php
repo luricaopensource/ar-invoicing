@@ -209,3 +209,14 @@ $App->get('account.update', function(){
 
     $this->output->json(['status' => true, 'message' => 'Actualizacion exitosa']);
 });
+
+$App->get('auth-logout', function(){
+    // Destruir la sesión
+    $this->session->close();
+    
+    $output = new stdclass;
+    $output->status = true;
+    $output->message = 'Sesión cerrada exitosamente';
+    
+    $this->output->json($output);
+});

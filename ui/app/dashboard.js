@@ -24,6 +24,33 @@ app.define("app.dashboard",function()
                         {
                             onItemClick: function(id)
                             {  
+                                // Verificar si es el logout
+                                if(id === "logout") {
+                                    webix.confirm({
+                                        title: "Confirmar Salida",
+                                        text: "¿Desea salir del sitio?",
+                                        ok: "Sí",
+                                        cancel: "No"
+                                    }).then(function(result) {
+                                        if(result) {
+                                            // Limpiar cookies
+                                            document.cookie.split(";").forEach(function(c) { 
+                                                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                                            });
+                                            
+                                            // Limpiar localStorage
+                                            localStorage.clear();
+                                            
+                                            // Llamar al endpoint de logout
+                                            __.GET({"action": "auth-logout"}, function(response) {
+                                                // Recargar la página
+                                                window.location.reload();
+                                            });
+                                        }
+                                    });
+                                    return;
+                                }
+
                                 $$("content").disable();
 
                                 console.log(this.getItem(id));
@@ -45,6 +72,13 @@ app.define("app.dashboard",function()
                                 __.GET({"action": "sidebar-list"}, function(data) {
                                     $$("_sidebar").clearAll();
                                     $$("_sidebar").parse(data);
+                                    
+                                    // Agregar opción de logout al final
+                                    $$("_sidebar").add({
+                                        id: "logout",
+                                        value: "CERRAR SESIÓN",
+                                        icon: "fa fa-sign-out"
+                                    });
                                 });
 
                             }) 
