@@ -1077,3 +1077,173 @@ $App->get('usuarios_tipo-rem', function($id = 0){
     
     $this->output->json(['status' => true, 'message' => 'Tipo de usuario eliminado exitosamente']);
 });
+
+// Endpoints para gestión de usuarios_emisores
+$App->get('usuarios_emisores-list', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $usuarios_emisores = $this->db->query("
+        SELECT 
+            ue.id,
+            ue.id_user,
+            ue.id_emisor,
+            u.nombre as usuario_nombre,
+            u.apellido as usuario_apellido,
+            u.user as usuario_user,
+            e.nombre as emisor_nombre,
+            e.afip_cuit as emisor_cuit
+        FROM usuarios_emisores ue
+        INNER JOIN usuarios u ON ue.id_user = u.id
+        INNER JOIN emisores e ON ue.id_emisor = e.id
+        ORDER BY u.nombre ASC
+    ")->result();
+    
+    $this->output->json($usuarios_emisores);
+});
+
+$App->get('usuarios_emisores-row', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid usuario_emisor id']);
+    
+    $usuario_emisor = $this->db->query("SELECT * FROM usuarios_emisores WHERE id = '{$id}'")->first();
+    $this->output->json($usuario_emisor);
+});
+
+$App->get('usuarios_emisores-add', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
+
+    $post = $this->input->post();
+
+    if(!$post->id_user || !$post->id_emisor) {
+        $this->output->json(['status' => false, 'message' => 'Debe seleccionar usuario y emisor']);
+    }
+
+    $usuarioExists = $this->db->query("SELECT id FROM usuarios WHERE id = '{$post->id_user}'")->first();
+    if(!$usuarioExists) {
+        $this->output->json(['status' => false, 'message' => 'Usuario no existe']);
+    }
+
+    $emisorExists = $this->db->query("SELECT id FROM emisores WHERE id = '{$post->id_emisor}'")->first();
+    if(!$emisorExists) {
+        $this->output->json(['status' => false, 'message' => 'Emisor no existe']);
+    }
+
+    // Verificar si ya existe la relación
+    $relacionExists = $this->db->query("SELECT id FROM usuarios_emisores WHERE id_user = '{$post->id_user}' AND id_emisor = '{$post->id_emisor}'")->first();
+    if($relacionExists) {
+        $this->output->json(['status' => false, 'message' => 'Esta relación ya existe']);
+    }
+
+    $this->db->query("
+        INSERT INTO usuarios_emisores 
+        SET 
+            id_user = '{$post->id_user}',
+            id_emisor = '{$post->id_emisor}'
+    ");
+
+    $this->output->json(['status' => true, 'message' => 'Relación usuario-emisor creada exitosamente']);
+});
+
+$App->get('usuarios_emisores-update', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    if( !$this->input->has_post() ) $this->output->json(['status' => false, 'message' => 'URL invalida']);
+
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid usuario_emisor id']);
+
+    $post = $this->input->post();
+
+    $usuario_emisorExists = $this->db->query("SELECT id FROM usuarios_emisores WHERE id = '{$id}'")->first();
+    if(!$usuario_emisorExists) {
+        $this->output->json(['status' => false, 'message' => 'Relación usuario-emisor no existe']);
+    }
+
+    if($post->id_user) {
+        $usuarioExists = $this->db->query("SELECT id FROM usuarios WHERE id = '{$post->id_user}'")->first();
+        if(!$usuarioExists) {
+            $this->output->json(['status' => false, 'message' => 'Usuario no existe']);
+        }
+    }
+
+    if($post->id_emisor) {
+        $emisorExists = $this->db->query("SELECT id FROM emisores WHERE id = '{$post->id_emisor}'")->first();
+        if(!$emisorExists) {
+            $this->output->json(['status' => false, 'message' => 'Emisor no existe']);
+        }
+    }
+
+    // Verificar si ya existe otra relación con los mismos valores
+    $relacionExists = $this->db->query("SELECT id FROM usuarios_emisores WHERE id_user = '{$post->id_user}' AND id_emisor = '{$post->id_emisor}' AND id != '{$id}'")->first();
+    if($relacionExists) {
+        $this->output->json(['status' => false, 'message' => 'Esta relación ya existe']);
+    }
+
+    $this->db->query("
+        UPDATE usuarios_emisores 
+        SET 
+            id_user = '{$post->id_user}',
+            id_emisor = '{$post->id_emisor}'
+        WHERE 
+            id = '{$id}'
+    ");
+
+    $this->output->json(['status' => true, 'message' => 'Relación usuario-emisor actualizada exitosamente']);
+});
+
+$App->get('usuarios_emisores-rem', function($id = 0){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+    
+    $id = (int)$id; 
+    if($id < 1) $this->output->json(['status' => false, 'message' => 'Invalid usuario_emisor id']);
+    
+    $usuario_emisorExists = $this->db->query("SELECT id FROM usuarios_emisores WHERE id = '{$id}'")->first();
+    if(!$usuario_emisorExists) {
+        $this->output->json(['status' => false, 'message' => 'Relación usuario-emisor no existe']);
+    }
+
+    $this->db->query("DELETE FROM usuarios_emisores WHERE id = '{$id}'");
+    
+    $this->output->json(['status' => true, 'message' => 'Relación usuario-emisor eliminada exitosamente']);
+});
+
+// Endpoints de combo para usuarios_emisores
+$App->get('usuarios.combo', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    $usuarios = $this->db->query("
+        SELECT 
+            id, 
+            CONCAT(nombre, ' ', apellido, ' (', user, ')') as value 
+        FROM usuarios 
+        WHERE activo = 1
+        ORDER BY nombre ASC
+    ")->result();
+
+    $this->output->json($usuarios);
+});
+
+$App->get('emisores.combo', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    $emisores = $this->db->query("
+        SELECT 
+            id, 
+            CONCAT(nombre, ' (', afip_cuit, ') ', afip_service) as value 
+        FROM emisores 
+        ORDER BY nombre ASC
+    ")->result();
+
+    $this->output->json($emisores);
+});
