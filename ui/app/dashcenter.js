@@ -27,7 +27,7 @@ app.define("app.dashcenter", function()
                                     label   : "Tipo", 
                                     view    : "combo",
                                     yCount  : "3", 
-                                    options : __.req({action:"tipo_factura.combo"}),
+                                    options : [],
                                     width   : 330,
                                     on:{
                                         onChange: function(tipo, oO){
@@ -79,11 +79,12 @@ app.define("app.dashcenter", function()
                                 },
                                 {},
                                 {
+                                    id      : "concepto",
                                     name    : "concepto", 
                                     label   : "Concepto", 
                                     view    : "combo",
                                     /*readonly:true,*/
-                                    options : __.req({action:"tipo_concepto.combo"}),
+                                    options : [],
                                     width   : 330
                                 }
                             ]
@@ -92,10 +93,11 @@ app.define("app.dashcenter", function()
                             cols: 
                             [
                                 {
+                                    id      : "tipo_doc",
                                     name    : "tipo_doc", 
                                     label   : "Tipo Doc.", 
                                     view    : "combo",
-                                    options : __.req({action:"tipo_doc.combo"}),
+                                    options : [],
                                     readonly:true,
                                     width   : 330
                                 },
@@ -111,10 +113,11 @@ app.define("app.dashcenter", function()
                             cols: 
                             [
                                 { 
+                                    id      : "emisor",
                                     name    : "emisor", 
                                     label   : "Emisor", 
                                     view    : "combo",
-                                    options : __.req({action:"emisores.combo"}),
+                                    options : [],
                                     width   : 300
                                 },
                                 {
@@ -172,7 +175,7 @@ app.define("app.dashcenter", function()
                                     view    : "richselect", 
                                     value   : 1,
                                     width   : 75,
-                                    options : __.req({action:"iva.combo"}),
+                                    options : [],
                                     on:{
                                         onChange: function(nN,oO, ev){
 
@@ -204,11 +207,12 @@ app.define("app.dashcenter", function()
                                 },
                                 {},
                                 { 
+                                    id      : "moneda",
                                     name    : "moneda", 
                                     label   : "Moneda", 
                                     view    : "richselect", 
                                     value   : 1,
-                                    options : __.req({action:"moneda.combo"}),
+                                    options : [],
                                     on:{
                                         onChange: function(nN,oO){
                                             console.log(`moneda(${nN},${oO})`);
@@ -355,6 +359,59 @@ app.define("app.dashcenter", function()
 
     webix.extend($$("view.facturador"), webix.ProgressBar);
 
+    // Función para cargar todos los combos después de conectar con AFIP
+    function loadCombos() {
+        console.log("Iniciando carga de combos...");
+        
+        // Cargar tipo de factura
+        __.GET({action:"tipo_factura.combo"}, function(data) {
+            console.log("Tipo factura cargado:", data);
+            $$("factura.tipo").define("options", data);
+            $$("factura.tipo").refresh();
+        });
+
+        // Cargar tipo de concepto
+        __.GET({action:"tipo_concepto.combo"}, function(data) {
+            console.log("Tipo concepto cargado:", data);
+            $$("concepto").define("options", data);
+            $$("concepto").refresh();
+        });
+
+        // Cargar tipo de documento
+        __.GET({action:"tipo_doc.combo"}, function(data) {
+            console.log("Tipo doc cargado:", data);
+            $$("tipo_doc").define("options", data);
+            $$("tipo_doc").refresh();
+        });
+
+        // Cargar emisores
+        __.GET({action:"emisores.combo"}, function(data) {
+            console.log("Emisores cargado:", data);
+            $$("emisor").define("options", data);
+            $$("emisor").refresh();
+        });
+
+        // Cargar IVA
+        __.GET({action:"iva.combo"}, function(data) {
+            console.log("IVA cargado:", data);
+            $$("facturbo.iva_combo").define("options", data);
+            $$("facturbo.iva_combo").refresh();
+        });
+
+        // Cargar moneda
+        __.GET({action:"moneda.combo"}, function(data) {
+            console.log("Moneda cargado:", data);
+            $$("moneda").define("options", data);
+            $$("moneda").refresh();
+        });
+
+        // Cargar datos iniciales del formulario
+        __.GET({action:"home.stats"}, function(response){
+            console.log("Datos iniciales cargados:", response);
+            $$("facturador").setValues(response); 
+        });
+    }
+
     webix.ui
     ({
         id    : "_main_tool_option" ,
@@ -400,9 +457,10 @@ app.define("app.dashcenter", function()
         }
     }, $$("_main_tool_option")); 
  
-    __.GET({action:"home.stats"}, function(response){
-        $$("facturador").setValues(response); 
-    });
+    // Los datos se cargarán solo después de conectar con AFIP exitosamente
+    // __.GET({action:"home.stats"}, function(response){
+    //     $$("facturador").setValues(response); 
+    // });
 
     webix.ui
     ({
@@ -417,10 +475,14 @@ app.define("app.dashcenter", function()
             __.GET({action:"afip.login"}, function(response){
 
                 if( response.status ){
+                    console.log("AFIP login exitoso, cargando combos...");
                     $$("view.facturador").showProgress({ hide: true }); 
                     $$("_main_tool_option").enable();
                     $$("_sec_tool_option").disable();
                     $$("_sec_tool_option").setValue(0);
+                    
+                    // Cargar todos los combos después de conectar exitosamente con AFIP
+                    loadCombos();
                 } 
                 else{ 
                     $$("view.facturador").showProgress({ hide: false }); 
