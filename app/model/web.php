@@ -1247,3 +1247,20 @@ $App->get('emisores.combo', function(){
 
     $this->output->json($emisores);
 });
+
+$App->get('emisores.usuario.combo', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    $emisores = $this->db->query("
+        SELECT DISTINCT
+            e.id, 
+            CONCAT(e.nombre, ' (', e.afip_cuit, ') ', e.afip_service) as value 
+        FROM emisores e
+        INNER JOIN usuarios_emisores ue ON e.id = ue.id_emisor
+        WHERE ue.id_user = '{$sessionId}'
+        ORDER BY e.nombre ASC
+    ")->result();
+
+    $this->output->json($emisores);
+});

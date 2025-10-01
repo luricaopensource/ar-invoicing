@@ -357,58 +357,87 @@ app.define("app.dashcenter", function()
         ]
     }, $$("content")); 
 
-    webix.extend($$("view.facturador"), webix.ProgressBar);
+    // Extender con OverlayBox y mostrar overlay inicial
+    webix.extend($$("view.facturador"), webix.OverlayBox);
+    $$("facturador").disable();
+    $$("view.facturador").showOverlay("<div style='display: flex; align-items: center; justify-content: center; height: 100%; font-size: 16px; font-weight: bold;'>Desconectado de ARCA (AFIP)</div>");
 
     // Función para cargar todos los combos después de conectar con AFIP
     function loadCombos() {
         console.log("Iniciando carga de combos...");
+        
+        // Deshabilitar todos los combos inicialmente
+        $$("factura.tipo").disable();
+        $$("concepto").disable();
+        $$("tipo_doc").disable();
+        $$("emisor").disable();
+        $$("facturbo.iva_combo").disable();
+        $$("moneda").disable();
         
         // Cargar tipo de factura
         __.GET({action:"tipo_factura.combo"}, function(data) {
             console.log("Tipo factura cargado:", data);
             $$("factura.tipo").define("options", data);
             $$("factura.tipo").refresh();
-        });
-
-        // Cargar tipo de concepto
-        __.GET({action:"tipo_concepto.combo"}, function(data) {
-            console.log("Tipo concepto cargado:", data);
-            $$("concepto").define("options", data);
-            $$("concepto").refresh();
-        });
-
-        // Cargar tipo de documento
-        __.GET({action:"tipo_doc.combo"}, function(data) {
-            console.log("Tipo doc cargado:", data);
-            $$("tipo_doc").define("options", data);
-            $$("tipo_doc").refresh();
-        });
-
-        // Cargar emisores
-        __.GET({action:"emisores.combo"}, function(data) {
-            console.log("Emisores cargado:", data);
+            $$("factura.tipo").enable();
+            
+            // Cargar tipo de concepto
+            __.GET({action:"tipo_concepto.combo"}, function(data) {
+                console.log("Tipo concepto cargado:", data);
+                $$("concepto").define("options", data);
+                $$("concepto").refresh();
+                $$("concepto").enable();
+                
+                // Cargar tipo de documento
+                __.GET({action:"tipo_doc.combo"}, function(data) {
+                    console.log("Tipo doc cargado:", data);
+                    $$("tipo_doc").define("options", data);
+                    $$("tipo_doc").refresh();
+                    $$("tipo_doc").enable();
+                    
+        // Cargar emisores del usuario
+        __.GET({action:"emisores.usuario.combo"}, function(data) {
+            console.log("Emisores del usuario cargado:", data);
+            
+            if(data.length === 0) {
+                // No hay emisores habilitados, mantener overlay
+                $$("view.facturador").showOverlay("<div style='display: flex; align-items: center; justify-content: center; height: 100%; font-size: 16px; font-weight: bold; color: orange;'>No posees emisores habilitados</div>");
+                return;
+            }
+            
             $$("emisor").define("options", data);
             $$("emisor").refresh();
-        });
-
-        // Cargar IVA
-        __.GET({action:"iva.combo"}, function(data) {
-            console.log("IVA cargado:", data);
-            $$("facturbo.iva_combo").define("options", data);
-            $$("facturbo.iva_combo").refresh();
-        });
-
-        // Cargar moneda
-        __.GET({action:"moneda.combo"}, function(data) {
-            console.log("Moneda cargado:", data);
-            $$("moneda").define("options", data);
-            $$("moneda").refresh();
-        });
-
-        // Cargar datos iniciales del formulario
-        __.GET({action:"home.stats"}, function(response){
-            console.log("Datos iniciales cargados:", response);
-            $$("facturador").setValues(response); 
+            $$("emisor").enable();
+                        
+                        // Cargar IVA
+                        __.GET({action:"iva.combo"}, function(data) {
+                            console.log("IVA cargado:", data);
+                            $$("facturbo.iva_combo").define("options", data);
+                            $$("facturbo.iva_combo").refresh();
+                            $$("facturbo.iva_combo").enable();
+                            
+                            // Cargar moneda
+                            __.GET({action:"moneda.combo"}, function(data) {
+                                console.log("Moneda cargado:", data);
+                                $$("moneda").define("options", data);
+                                $$("moneda").refresh();
+                                $$("moneda").enable();
+                                
+                                // Cargar datos iniciales del formulario
+                                __.GET({action:"home.stats"}, function(response){
+                                    console.log("Datos iniciales cargados:", response);
+                                    $$("facturador").setValues(response);
+                                    
+                                    // Habilitar formulario y ocultar overlay
+                                    $$("facturador").enable();
+                                    $$("view.facturador").hideOverlay();
+                                    console.log("Todos los combos cargados, formulario habilitado");
+                                });
+                            });
+                        });
+                    });
+                });
+            });
         });
     }
 
@@ -424,7 +453,10 @@ app.define("app.dashcenter", function()
         width : 200                 ,
         click : function()
         {
-            $$("view.facturador").showProgress({ hide: false }); 
+            // Deshabilitar formulario y mostrar overlay
+            $$("facturador").disable();
+            $$("view.facturador").showOverlay("<div style='display: flex; align-items: center; justify-content: center; height: 100%; font-size: 16px; font-weight: bold;'>Enviando factura a afip...</div>");
+            
             __.POST({action:"home.facturacion" }, $$("facturador").getValues(), function(response){
 
                 if(response.FeDetResp.FECAEDetResponse.Resultado == "A"){
@@ -450,9 +482,10 @@ app.define("app.dashcenter", function()
                       });
                 }
 
+                // Habilitar formulario y ocultar overlay
+                $$("facturador").enable();
+                $$("view.facturador").hideOverlay();
 
-
-                $$("view.facturador").showProgress({ hide: true });
             });
         }
     }, $$("_main_tool_option")); 
@@ -472,11 +505,13 @@ app.define("app.dashcenter", function()
         onLabel : "INICIAR"         ,
         offLabel: "DETENER"         ,
         click   : function(id){
+            // Cambiar mensaje del overlay a "Conectando a afip..."
+            $$("view.facturador").showOverlay("<div style='display: flex; align-items: center; justify-content: center; height: 100%; font-size: 16px; font-weight: bold;'>Conectando a afip...</div>");
+            
             __.GET({action:"afip.login"}, function(response){
 
                 if( response.status ){
                     console.log("AFIP login exitoso, cargando combos...");
-                    $$("view.facturador").showProgress({ hide: true }); 
                     $$("_main_tool_option").enable();
                     $$("_sec_tool_option").disable();
                     $$("_sec_tool_option").setValue(0);
@@ -485,7 +520,8 @@ app.define("app.dashcenter", function()
                     loadCombos();
                 } 
                 else{ 
-                    $$("view.facturador").showProgress({ hide: false }); 
+                    // Mostrar overlay de error
+                    $$("view.facturador").showOverlay("<div style='display: flex; align-items: center; justify-content: center; height: 100%; font-size: 16px; font-weight: bold; color: red;'>Error de conexión AFIP</div>");
                     $$("_main_tool_option").disable();
                     $$("_sec_tool_option").setValue(1);
 
@@ -500,7 +536,7 @@ app.define("app.dashcenter", function()
 
     }, $$("_sec_tool_option"));  
 
-    $$("view.facturador").showProgress({ hide: false }); 
+    // Estado inicial: botón FACTURAR deshabilitado
     $$("_main_tool_option").disable();
 
     
