@@ -1,5 +1,11 @@
 app.define("app.dashboard",function()
 {   
+    // Mostrar botones de la mainbar cuando se carga el dashboard
+    setTimeout(function() {
+        if($$("_sec_tool_option")) $$("_sec_tool_option").show();
+        if($$("_main_tool_option")) $$("_main_tool_option").show();
+    }, 100);
+    
     webix.ui
     ({
         id  : "app.page",  

@@ -1,6 +1,10 @@
 app.define("app.dashcenter", function()
 {  
     __.setTitle("Bienvenido");
+    
+    // Mostrar botones de la mainbar cuando se regresa a dashcenter
+    if($$("_sec_tool_option")) $$("_sec_tool_option").show();
+    if($$("_main_tool_option")) $$("_main_tool_option").show();
     webix.ui
     ({
         id          : "content",  

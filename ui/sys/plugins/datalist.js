@@ -167,6 +167,30 @@ webix.protoUI
 
     on_render: function()
     { 
+        // Ocultar botones de la mainbar cuando se muestra datalist
+        var hideButtons = function() {
+            if($$("_sec_tool_option")) $$("_sec_tool_option").hide();
+            if($$("_main_tool_option")) $$("_main_tool_option").hide();
+        };
+        
+        // Ocultar botón "btn_add_undefined" para vistas de comprobantes
+        var hideComprobantesButtons = function() {
+            if($$("btn_add_undefined")) $$("btn_add_undefined").hide();
+        };
+        
+        // Intentar ocultar inmediatamente
+        hideButtons();
+        hideComprobantesButtons();
+        
+        // Y también con timeout por si acaso
+        setTimeout(function() {
+            hideButtons();
+            hideComprobantesButtons();
+        }, 100);
+        setTimeout(function() {
+            hideButtons();
+            hideComprobantesButtons();
+        }, 300);
     },
 
     title_setter  :function(value) { this.title   = value; },

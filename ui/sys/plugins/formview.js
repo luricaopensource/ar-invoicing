@@ -93,6 +93,19 @@ webix.protoUI
     {
         var that = this;
 
+        // Ocultar botones de la mainbar cuando se muestra formview
+        var hideButtons = function() {
+            if($$("_sec_tool_option")) $$("_sec_tool_option").hide();
+            if($$("_main_tool_option")) $$("_main_tool_option").hide();
+        };
+        
+        // Intentar ocultar inmediatamente
+        hideButtons();
+        
+        // Y también con timeout por si acaso
+        setTimeout(hideButtons, 100);
+        setTimeout(hideButtons, 300);
+
         setTimeout(function()
         {  
             if(__.current[that.store]!=undefined)

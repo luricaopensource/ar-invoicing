@@ -12,8 +12,8 @@
     { "tag" : "script" , "cache": true, "url": "sys/core/noback.js"       },
     { "tag" : "script" , "cache": true, "url": "sys/core/waves.js"        },
     { "tag" : "script" , "cache": false, "url": "sys/plugins/mainbar.js"   },
-    { "tag" : "script" , "cache": true, "url": "sys/plugins/datalist.js"  },
-    { "tag" : "script" , "cache": true, "url": "sys/plugins/formview.js"  },
+    { "tag" : "script" , "cache": false, "url": "sys/plugins/datalist.js"  },
+    { "tag" : "script" , "cache": false, "url": "sys/plugins/formview.js"  },
     { "tag" : "script" , "cache": true, "url": "sys/plugins/cards.js"     },
     { "tag" : "script" , "cache": true, "url": "app/main.js"              }
 ]
