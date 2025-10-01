@@ -1265,3 +1265,60 @@ $App->get('emisores.usuario.combo', function(){
 
     $this->output->json($emisores);
 });
+
+$App->get('afip.emisor.test', function(){
+    $sessionId = (int)$this->session->recv(); 
+    if($sessionId < 1) $this->output->json(['status' => false, 'message' => 'Termino el tiempo de session']);
+
+    $post = $this->input->post();
+    
+    // Validar campos requeridos
+    if(empty($post->afip_crt) || empty($post->afip_key) || empty($post->afip_passphrase)) {
+        $this->output->json([
+            'status' => false, 
+            'message' => 'Faltan campos requeridos: Certificado CRT, Clave KEY o Passphrase'
+        ]);
+    }
+    
+    try {
+        // Usar la librería AFIP del sistema como en afip_session.php
+        $traStringXML = $this->afip->service('wsfe')->loginWithCredentials(
+            $post->afip_crt, 
+            $post->afip_key, 
+            $post->afip_passphrase, 
+            null // No hay TRA previo para la prueba
+        );
+        
+        if ($traStringXML) {
+            // Validar TRA usando la librería AFIP
+            if ($this->afip->checkTicketResponseAccess($traStringXML)) {
+                $this->output->json([
+                    'status' => true,
+                    'message' => 'Conexión exitosa con AFIP. Certificados válidos.',
+                    'tra' => $traStringXML
+                ]);
+            } else {
+                $this->output->json([
+                    'status' => false,
+                    'message' => 'TRA XML inválido'
+                ]);
+            }
+        } else {
+            $this->output->json([
+                'status' => false,
+                'message' => 'No se pudo obtener el token de autenticación'
+            ]);
+        }
+        
+    } catch(AfipLoginException $e) {
+        $this->output->json([
+            'status' => false,
+            'message' => 'Error de autenticación AFIP: ' . $e->getMessage()
+        ]);
+    } catch(Exception $e) {
+        $this->output->json([
+            'status' => false,
+            'message' => 'Error de conexión con AFIP: ' . $e->getMessage()
+        ]);
+    }
+});

@@ -39,7 +39,8 @@ webix.protoUI
                             },
                             { id : config.store+"_title", view  : "label" },
                             { id : config.store+"_extra", width : 1       },
-                            { id : config.store+"_fecha", width : 1       }, 
+                            { id : config.store+"_fecha", width : 1       },
+                            { id : config.store+"_custom_buttons", width : 1       }, 
                             {
                                 id        : config.store+"_btn",
                                 go        : config             ,
@@ -181,6 +182,14 @@ webix.protoUI
     store_setter      :function(value) { this.store       = value; }, 
     title_set_setter  :function(value) { this.title_set   = value; }, 
     title_add_setter  :function(value) { this.title_add   = value; },  
-    source_setter     :function(value) { this.source      = value; }  
+    source_setter     :function(value) { this.source      = value; },
+    
+    // Método para agregar botones personalizados
+    addCustomButton: function(buttonConfig) {
+        var customButtonsContainer = $$(this.store + "_custom_buttons");
+        if(customButtonsContainer) {
+            webix.ui(buttonConfig, customButtonsContainer);
+        }
+    }  
 
 }, webix.EventSystem, webix.ui.layout);    
